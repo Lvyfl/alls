@@ -1,0 +1,23 @@
+[
+  {
+    "id": "barangay-1",
+    "name": "Barangay 1 (POB.)",
+    "address": "Poblacion 1, Indang, Cavite",
+    "latitude": 14.1947,
+    "longitude": 120.8769
+  },
+  {
+    "id": "barangay-2",
+    "name": "Calumpang Lejos I",
+    "address": "Calumpang Lejos I, Indang, Cavite",
+    "latitude": 14.1889,
+    "longitude": 120.8845
+  },
+  {
+    "id": "barangay-3",
+    "name": "Pulo",
+    "address": "Pulo, Indang, Cavite",
+    "latitude": 14.2012,
+    "longitude": 120.8692
+  }
+]

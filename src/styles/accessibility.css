@@ -1,0 +1,227 @@
+/* ===== ACCESSIBILITY STYLES ===== */
+
+/* Font Scale Variables */
+:root {
+  --font-scale: 1;
+  
+  /* Base font sizes that will be scaled */
+  --text-xs: calc(0.75rem * var(--font-scale));
+  --text-sm: calc(0.875rem * var(--font-scale));
+  --text-base: calc(1rem * var(--font-scale));
+  --text-lg: calc(1.125rem * var(--font-scale));
+  --text-xl: calc(1.25rem * var(--font-scale));
+  --text-2xl: calc(1.5rem * var(--font-scale));
+  --text-3xl: calc(1.875rem * var(--font-scale));
+  --text-4xl: calc(2.25rem * var(--font-scale));
+  
+  /* Light Theme Colors */
+  --color-background: #ffffff;
+  --color-background-secondary: #f8fafc;
+  --color-background-tertiary: #f1f5f9;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #ffffff;
+  
+  --color-text-primary: #1e293b;
+  --color-text-secondary: #475569;
+  --color-text-tertiary: #64748b;
+  --color-text-muted: #94a3b8;
+  
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+  --color-border-accent: #2563eb;
+  
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-light: #dbeafe;
+  
+  --color-success: #059669;
+  --color-success-light: #d1fae5;
+  --color-warning: #d97706;
+  --color-warning-light: #fef3c7;
+  --color-error: #dc2626;
+  --color-error-light: #fee2e2;
+  
+  /* Shadow variables */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Dark Theme Colors */
+[data-theme="dark"] {
+  --color-background: #0f172a;
+  --color-background-secondary: #1e293b;
+  --color-background-tertiary: #334155;
+  --color-surface: #1e293b;
+  --color-surface-elevated: #334155;
+  
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #e2e8f0;
+  --color-text-tertiary: #cbd5e1;
+  --color-text-muted: #94a3b8;
+  
+  --color-border: #334155;
+  --color-border-strong: #475569;
+  --color-border-accent: #3b82f6;
+  
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-primary-light: #1e3a8a;
+  
+  --color-success: #10b981;
+  --color-success-light: #064e3b;
+  --color-warning: #f59e0b;
+  --color-warning-light: #78350f;
+  --color-error: #ef4444;
+  --color-error-light: #7f1d1d;
+  
+  /* Dark mode shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+}
+
+/* ===== FONT SCALING UTILITIES ===== */
+
+/* Apply font scaling to all text elements */
+.font-scale {
+  font-size: var(--text-base);
+}
+
+.font-scale-xs {
+  font-size: var(--text-xs);
+}
+
+.font-scale-sm {
+  font-size: var(--text-sm);
+}
+
+.font-scale-lg {
+  font-size: var(--text-lg);
+}
+
+.font-scale-xl {
+  font-size: var(--text-xl);
+}
+
+.font-scale-2xl {
+  font-size: var(--text-2xl);
+}
+
+.font-scale-3xl {
+  font-size: var(--text-3xl);
+}
+
+.font-scale-4xl {
+  font-size: var(--text-4xl);
+}
+
+/* ===== THEME UTILITIES ===== */
+
+/* Background utilities */
+.bg-theme-primary {
+  background-color: var(--color-background);
+}
+
+.bg-theme-secondary {
+  background-color: var(--color-background-secondary);
+}
+
+.bg-theme-surface {
+  background-color: var(--color-surface);
+}
+
+.bg-theme-surface-elevated {
+  background-color: var(--color-surface-elevated);
+}
+
+/* Text utilities */
+.text-theme-primary {
+  color: var(--color-text-primary);
+}
+
+.text-theme-secondary {
+  color: var(--color-text-secondary);
+}
+
+.text-theme-tertiary {
+  color: var(--color-text-tertiary);
+}
+
+.text-theme-muted {
+  color: var(--color-text-muted);
+}
+
+/* Border utilities */
+.border-theme {
+  border-color: var(--color-border);
+}
+
+.border-theme-strong {
+  border-color: var(--color-border-strong);
+}
+
+.border-theme-accent {
+  border-color: var(--color-border-accent);
+}
+
+/* ===== SMOOTH TRANSITIONS ===== */
+
+/* Add smooth transitions for theme changes */
+* {
+  transition: background-color 0.2s ease-in-out,
+              color 0.2s ease-in-out,
+              border-color 0.2s ease-in-out,
+              box-shadow 0.2s ease-in-out;
+}
+
+/* Disable transitions during theme initialization to prevent flash */
+.no-transition * {
+  transition: none !important;
+}
+
+/* ===== BODY THEME INTEGRATION ===== */
+
+/* Ensure body background changes with theme */
+body {
+  background-color: var(--color-background) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* ===== FOCUS STATES ===== */
+
+/* Enhanced focus states for accessibility */
+.focus-theme:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.focus-theme:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ===== HIGH CONTRAST SUPPORT ===== */
+
+/* Ensure proper contrast in high contrast mode */
+@media (prefers-contrast: high) {
+  :root {
+    --color-border: #000000;
+    --color-text-primary: #000000;
+  }
+  
+  [data-theme="dark"] {
+    --color-border: #ffffff;
+    --color-text-primary: #ffffff;
+  }
+}
+
+/* ===== REDUCED MOTION SUPPORT ===== */
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

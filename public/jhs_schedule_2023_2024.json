@@ -1,0 +1,78 @@
+[
+  {
+    "date": "August 29-31, Sept. 1, 2023",
+    "quarter": "Q1",
+    "week": "W1",
+    "task": "Class Orientation",
+    "lessons": []
+  },
+  {
+    "date": "September 4 - October 20, 2023",
+    "quarter": "Q1",
+    "week": "W2-9",
+    "task": "Administration of Pre-FLT",
+    "lessons": [],
+    "remarks": "Submission of Pre-FLT Consolidated Report: October 30-31, 2023"
+  },
+  {
+    "date": "September 11-15, 2023",
+    "quarter": "Q1",
+    "week": "W3",
+    "task": "Introduction to ALS Forms / Filling-Up Forms",
+    "lessons": []
+  },
+  {
+    "date": "September 18-22, 2023",
+    "quarter": "Q1",
+    "week": "W4",
+    "lessons": [
+      "LS 1 (English): I Get It (Recognizing the Main Idea)",
+      "LS 4 (LifeSkills): Road to Employment"
+    ]
+  },
+  {
+    "date": "September 25-29, 2023",
+    "quarter": "Q1",
+    "week": "W5",
+    "lessons": [
+      "LS 1 (Filipino): Mga Kuwento sa Likod ng Akda at Pelikula",
+      "LS 5 (Understanding Self): Reaching Your Full Potential"
+    ]
+  },
+  {
+    "date": "October 2-6, 2023",
+    "quarter": "Q1",
+    "week": "W6",
+    "lessons": [
+      "LS 2 (Science): Why Do I Need to Believe in Science?",
+      "LS 6 (Digital Citizenship): Let's Fix Computers"
+    ]
+  },
+  {
+    "date": "October 9-13, 2023",
+    "quarter": "Q1",
+    "week": "W7",
+    "lessons": [
+      "LS 3 (Mathematics): Meeting the Families of Numbers"
+    ]
+  },
+  {
+    "date": "October 16-20, 2023",
+    "quarter": "Q1",
+    "week": "W8",
+    "task": "Module 2",
+    "lessons": [
+      "LS 1 (English): In Other Words (Restating Information)",
+      "LS 4 (LifeSkills): Starting a Business"
+    ]
+  },
+  {
+    "date": "October 23-27, 2023",
+    "quarter": "Q1",
+    "week": "W9",
+    "lessons": [
+      "LS 1 (Filipino): Ano ang Simula, Kailan ang Gitna, at Paano ang Dulo?",
+      "LS 5 (Understanding Self): Unity in Diversity"
+    ]
+  }
+]

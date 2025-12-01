@@ -1,0 +1,217 @@
+{
+  "barangays": [
+    { "id": "barangay-1", "name": "Barangay 1 (POB.)" },
+    { "id": "barangay-2", "name": "Calumpang Lejos I" },
+    { "id": "barangay-3", "name": "Pulo" }
+  ],
+
+  "students": [
+    // ========== FROM AF-3_20241109191437 cal lejos.xls ==========
+    {
+      "id": "109129090001",
+      "name": "ABANES, Dave B.",
+      "status": "active",
+      "gender": "male",
+      "birthDate": "2003-09-11",
+      "age": 20,
+      "address": "Purok 2, Barangay 1 (POB.), Indang, Cavite",
+      "barangayId": "barangay-1",
+      "program": "A&E Elementary",
+      "enrollmentDate": "2024-08-08",
+      "modality": "Face to Face",
+      "pisScore": null,
+      "assessment": {
+        "reading": null,
+        "numeracy": null,
+        "writing": null,
+        "listeningSpeaking": null,
+        "overall": null
+      }
+    },
+    {
+      "id": "108187100040",
+      "name": "AÑONUEVO, Christian L.",
+      "status": "active",
+      "gender": "male",
+      "birthDate": "2000-12-22",
+      "age": 23,
+      "address": "Sitio Malinis, Calumpang Lejos I, Indang, Cavite",
+      "barangayId": "barangay-2",
+      "program": "A&E Secondary",
+      "enrollmentDate": "2024-08-05",
+      "modality": "Face to Face",
+      "pisScore": null,
+      "assessment": {
+        "reading": null,
+        "numeracy": null,
+        "writing": null,
+        "listeningSpeaking": null,
+        "overall": null
+      }
+    },
+    // [...] (28 more students from first file)
+
+    // ========== FROM AF-3_20241110044731 pob1.xls ==========
+    {
+      "id": "114160120083",
+      "name": "ACABADO, Rey Jazper B.",
+      "status": "active",
+      "gender": "male",
+      "birthDate": "2005-01-20",
+      "age": 19,
+      "address": "Purok 3, Barangay 1 (POB.), Indang, Cavite",
+      "barangayId": "barangay-1",
+      "program": "A&E Elementary",
+      "enrollmentDate": "2024-08-06",
+      "modality": "Face to Face",
+      "pisScore": null,
+      "assessment": {
+        "reading": null,
+        "numeracy": null,
+        "writing": null,
+        "listeningSpeaking": null,
+        "overall": null
+      }
+    },
+    {
+      "id": "108012100012",
+      "name": "BORRAL, John Rodnel P.",
+      "status": "active",
+      "gender": "male",
+      "birthDate": "2004-06-14",
+      "age": 20,
+      "address": "Sitio Maligaya, Calumpang Lejos I, Indang, Cavite",
+      "barangayId": "barangay-2",
+      "program": "A&E Secondary",
+      "enrollmentDate": "2024-09-09",
+      "modality": "Face to Face",
+      "pisScore": null,
+      "assessment": {
+        "reading": null,
+        "numeracy": null,
+        "writing": null,
+        "listeningSpeaking": null,
+        "overall": null
+      }
+    },
+    // [...] (31 more students from second file)
+
+    // ========== FROM AF-3_20241109191424 pulo.xls ==========
+    {
+      "id": "113776100013",
+      "name": "COLLADO, Hilbert V.",
+      "status": "active",
+      "gender": "male",
+      "birthDate": "2004-06-01",
+      "age": 20,
+      "address": "Purok 5, Pulo, Indang, Cavite",
+      "barangayId": "barangay-3",
+      "program": "A&E Secondary",
+      "enrollmentDate": "2024-08-07",
+      "modality": "Face to Face",
+      "pisScore": null,
+      "assessment": {
+        "reading": null,
+        "numeracy": null,
+        "writing": null,
+        "listeningSpeaking": null,
+        "overall": null
+      }
+    },
+    {
+      "id": "541022400599",
+      "name": "CANINO, Maria Milagros C.",
+      "status": "active",
+      "gender": "female",
+      "birthDate": "1975-08-29",
+      "age": 48,
+      "address": "Sitio Pag-asa, Pulo, Indang, Cavite",
+      "barangayId": "barangay-3",
+      "program": "A&E Elementary",
+      "enrollmentDate": "2024-08-06",
+      "modality": "Face to Face",
+      "pisScore": null,
+      "assessment": {
+        "reading": null,
+        "numeracy": null,
+        "writing": null,
+        "listeningSpeaking": null,
+        "overall": null
+      }
+    }
+    // [...] (15 more students from third file)
+  ],
+
+  "modules": [
+    {
+      "id": "module-1",
+      "title": "Basic Literacy (BLP)",
+      "levels": ["Basic Literate", "Neo Literate", "Post Literate"]
+    },
+    {
+      "id": "module-2",
+      "title": "Elementary Level Numeracy",
+      "levels": ["A&E Elementary"]
+    },
+    {
+      "id": "module-3",
+      "title": "Secondary Level Mathematics",
+      "levels": ["A&E Secondary"]
+    },
+    {
+      "id": "module-4",
+      "title": "Functional Literacy",
+      "levels": ["All Programs"]
+    }
+  ],
+
+  "progress": [
+    // Sample progress records (would include all students in full file)
+    {
+      "studentId": "109129090001",
+      "moduleId": "module-1",
+      "activities": [
+        {
+          "name": "Alphabet Recognition",
+          "type": "Quiz",
+          "score": 18,
+          "total": 20,
+          "date": "2024-08-15",
+          "remarks": "Needs vowel practice"
+        }
+      ]
+    },
+    {
+      "studentId": "541022400599",
+      "moduleId": "module-2",
+      "activities": [
+        {
+          "name": "Addition Basics",
+          "type": "Assignment",
+          "score": 22,
+          "total": 25,
+          "date": "2024-09-05",
+          "remarks": "Good fundamentals"
+        }
+      ]
+    }
+    // [...] (Progress for all 80 students)
+  ],
+
+  "metadata": {
+    "totalStudents": 80,
+    "maleCount": 44,
+    "femaleCount": 36,
+    "programDistribution": {
+      "BLP": 1,
+      "A&E Elementary": 24,
+      "A&E Secondary": 55
+    },
+    "barangayDistribution": {
+      "barangay-1": 30,
+      "barangay-2": 33,
+      "barangay-3": 17
+    },
+    "dateGenerated": "2024-05-21"
+  }
+}

@@ -1,0 +1,274 @@
+[
+  {
+    "id": "progress-1",
+    "studentId": "109129090001",
+    "barangayId": "barangay-1",
+    "moduleId": "module-1",
+    "activities": [
+      {
+        "name": "Number Recognition (1-100)",
+        "type": "Assessment",
+        "score": 20,
+        "total": 25,
+        "date": "2024-08-15",
+        "remarks": "Good progress"
+      },
+      {
+        "name": "Basic Addition",
+        "type": "Assessment",
+        "score": 18,
+        "total": 20,
+        "date": "2024-08-22",
+        "remarks": "Excellent"
+      },
+      {
+        "name": "Basic Subtraction",
+        "type": "Assessment",
+        "score": 16,
+        "total": 20,
+        "date": "2024-08-29",
+        "remarks": "Good work"
+      }
+    ]
+  },
+  {
+    "id": "progress-2",
+    "studentId": "108187100040",
+    "barangayId": "barangay-2",
+    "moduleId": "module-2",
+    "activities": [
+      {
+        "name": "Letter Recognition",
+        "type": "Assessment",
+        "score": 24,
+        "total": 26,
+        "date": "2024-08-18",
+        "remarks": "Excellent progress"
+      },
+      {
+        "name": "Phonics and Sound Recognition",
+        "type": "Assessment",
+        "score": 18,
+        "total": 20,
+        "date": "2024-09-01",
+        "remarks": "Good understanding"
+      }
+    ]
+  },
+  {
+    "id": "progress-3",
+    "studentId": "114160120083",
+    "barangayId": "barangay-1",
+    "moduleId": "module-1",
+    "activities": [
+      {
+        "name": "Basic Addition",
+        "type": "Assessment",
+        "score": 19,
+        "total": 20,
+        "date": "2024-08-20",
+        "remarks": "Excellent"
+      },
+      {
+        "name": "Multiplication Tables (1-10)",
+        "type": "Assessment",
+        "score": 28,
+        "total": 30,
+        "date": "2024-09-05",
+        "remarks": "Very good progress"
+      }
+    ]
+  },
+  {
+    "id": "progress-4",
+    "studentId": "108012100012",
+    "barangayId": "barangay-2",
+    "moduleId": "module-3",
+    "activities": [
+      {
+        "name": "Geometry Basics",
+        "type": "Quiz",
+        "score": 15,
+        "total": 20,
+        "date": "2024-09-15",
+        "remarks": "Good understanding"
+      }
+    ]
+  },
+  {
+    "id": "progress-5",
+    "studentId": "113776100013",
+    "barangayId": "barangay-3",
+    "moduleId": "module-3",
+    "activities": [
+      {
+        "name": "Algebra Expressions",
+        "type": "Quiz",
+        "score": 25,
+        "total": 30,
+        "date": "2024-08-25",
+        "remarks": "Good work"
+      },
+      {
+        "name": "Linear Equations",
+        "type": "Assignment",
+        "score": 18,
+        "total": 20,
+        "date": "2024-09-10",
+        "remarks": "Excellent"
+      }
+    ]
+  },
+  {
+    "id": "progress-6",
+    "studentId": "541022400599",
+    "barangayId": "barangay-3",
+    "moduleId": "module-2",
+    "activities": [
+      {
+        "name": "Addition Basics",
+        "type": "Assignment",
+        "score": 22,
+        "total": 25,
+        "date": "2024-09-05",
+        "remarks": "Good fundamentals"
+      },
+      {
+        "name": "Subtraction Practice",
+        "type": "Quiz",
+        "score": 18,
+        "total": 20,
+        "date": "2024-09-12",
+        "remarks": "Excellent"
+      }
+    ]
+  },
+  {
+    "id": "progress-7",
+    "studentId": "109876543210",
+    "barangayId": "barangay-1",
+    "moduleId": "module-3",
+    "activities": [
+      {
+        "name": "Algebra Quiz 1",
+        "type": "Quiz",
+        "score": 27,
+        "total": 30,
+        "date": "2024-08-22",
+        "remarks": "Excellent work"
+      },
+      {
+        "name": "Geometry Assignment",
+        "type": "Assignment",
+        "score": 23,
+        "total": 25,
+        "date": "2024-09-08",
+        "remarks": "Very good"
+      }
+    ]
+  },
+  {
+    "id": "progress-8",
+    "studentId": "109876543211",
+    "barangayId": "barangay-2",
+    "moduleId": "module-3",
+    "activities": [
+      {
+        "name": "Algebra Quiz 2",
+        "type": "Quiz",
+        "score": 29,
+        "total": 30,
+        "date": "2024-08-28",
+        "remarks": "Outstanding"
+      },
+      {
+        "name": "Problem Solving",
+        "type": "Activity",
+        "score": 19,
+        "total": 20,
+        "date": "2024-09-15",
+        "remarks": "Excellent analytical skills"
+      }
+    ]
+  },
+  {
+    "id": "progress-9",
+    "studentId": "109876543212",
+    "barangayId": "barangay-3",
+    "moduleId": "module-2",
+    "activities": [
+      {
+        "name": "Basic Math Quiz",
+        "type": "Quiz",
+        "score": 15,
+        "total": 25,
+        "date": "2024-07-25",
+        "remarks": "Needs improvement"
+      }
+    ]
+  },
+  {
+    "id": "progress-10",
+    "studentId": "109876543213",
+    "barangayId": "barangay-1",
+    "moduleId": "module-1",
+    "activities": [
+      {
+        "name": "Letter Recognition",
+        "type": "Activity",
+        "score": 12,
+        "total": 26,
+        "date": "2024-08-25",
+        "remarks": "Improving slowly"
+      },
+      {
+        "name": "Basic Reading",
+        "type": "Quiz",
+        "score": 10,
+        "total": 20,
+        "date": "2024-09-10",
+        "remarks": "Needs more practice"
+      }
+    ]
+  },
+  {
+    "id": "progress-11",
+    "studentId": "12345",
+    "barangayId": "barangay-1",
+    "moduleId": "module-1",
+    "activities": [
+      {
+        "name": "Math Quiz 1",
+        "type": "Quiz",
+        "score": 8,
+        "total": 10,
+        "date": "2024-08-20",
+        "remarks": "Passed"
+      },
+      {
+        "name": "Reading Worksheet",
+        "type": "Assignment",
+        "score": 7,
+        "total": 10,
+        "date": "2024-08-25",
+        "remarks": "Passed"
+      },
+      {
+        "name": "Science Project",
+        "type": "Project",
+        "score": 15,
+        "total": 20,
+        "date": "2024-09-01",
+        "remarks": "Good work"
+      },
+      {
+        "name": "Participation Week 1",
+        "type": "Participation",
+        "score": 5,
+        "total": 5,
+        "date": "2024-09-05",
+        "remarks": "Excellent"
+      }
+    ]
+  }
+]

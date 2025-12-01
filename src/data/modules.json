@@ -1,0 +1,452 @@
+[
+  {
+    "id": "module-1",
+    "title": "Numeracy",
+    "levels": ["A&E Elementary"],
+    "predefinedActivities": [
+      {
+        "name": "Number Recognition (1-100)",
+        "type": "Assessment",
+        "total": 25,
+        "description": "Identify and write numbers from 1 to 100"
+      },
+      {
+        "name": "Basic Addition",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Addition of single and double-digit numbers"
+      },
+      {
+        "name": "Basic Subtraction",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Subtraction of single and double-digit numbers"
+      },
+      {
+        "name": "Multiplication Tables (1-10)",
+        "type": "Assessment",
+        "total": 30,
+        "description": "Memorization and application of multiplication tables"
+      },
+      {
+        "name": "Basic Division",
+        "type": "Assessment",
+        "total": 15,
+        "description": "Simple division problems without remainders"
+      },
+      {
+        "name": "Money and Measurement",
+        "type": "Assessment",
+        "total": 25,
+        "description": "Understanding Philippine currency and basic measurements"
+      }
+    ]
+  },
+  {
+    "id": "module-2",
+    "title": "Functional Literacy",
+    "levels": ["A&E Elementary"],
+    "predefinedActivities": [
+      {
+        "name": "Letter Recognition",
+        "type": "Assessment",
+        "total": 26,
+        "description": "Identify uppercase and lowercase letters"
+      },
+      {
+        "name": "Phonics and Sound Recognition",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Associate letters with their sounds"
+      },
+      {
+        "name": "Basic Reading Comprehension",
+        "type": "Assessment",
+        "total": 25,
+        "description": "Read and understand simple sentences and paragraphs"
+      },
+      {
+        "name": "Vocabulary Building",
+        "type": "Assessment",
+        "total": 30,
+        "description": "Learn and use common Filipino and English words"
+      },
+      {
+        "name": "Basic Writing Skills",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Write simple sentences and short paragraphs"
+      }
+    ]
+  },
+  {
+    "id": "module-3",
+    "title": "Communication Skills",
+    "levels": ["A&E Elementary"],
+    "predefinedActivities": [
+      {
+        "name": "Listening Comprehension",
+        "type": "Assessment",
+        "total": 25,
+        "description": "Understand spoken instructions and stories"
+      },
+      {
+        "name": "Speaking and Pronunciation",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Express ideas clearly in Filipino and English"
+      },
+      {
+        "name": "Reading Aloud",
+        "type": "Assessment",
+        "total": 15,
+        "description": "Read texts with proper pronunciation and expression"
+      },
+      {
+        "name": "Written Communication",
+        "type": "Assessment",
+        "total": 25,
+        "description": "Write letters, messages, and simple reports"
+      },
+      {
+        "name": "Non-verbal Communication",
+        "type": "Assessment",
+        "total": 15,
+        "description": "Understand and use appropriate body language"
+      }
+    ]
+  },
+  {
+    "id": "module-4",
+    "title": "Life Skills and Values",
+    "levels": ["A&E Elementary"],
+    "predefinedActivities": [
+      {
+        "name": "Personal Hygiene and Health",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Practice proper hygiene and health habits"
+      },
+      {
+        "name": "Family and Community Values",
+        "type": "Assessment",
+        "total": 25,
+        "description": "Understand roles and responsibilities in family and community"
+      },
+      {
+        "name": "Environmental Awareness",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Care for the environment and natural resources"
+      },
+      {
+        "name": "Basic Life Skills",
+        "type": "Assessment",
+        "total": 25,
+        "description": "Cooking, cleaning, and household management"
+      },
+      {
+        "name": "Values Formation",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Develop honesty, respect, and responsibility"
+      }
+    ]
+  },
+  {
+    "id": "module-5",
+    "title": "Digital Literacy",
+    "levels": ["A&E Elementary"],
+    "predefinedActivities": [
+      {
+        "name": "Computer Basics",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Basic computer operation and parts identification"
+      },
+      {
+        "name": "Internet Safety",
+        "type": "Assessment",
+        "total": 15,
+        "description": "Safe and responsible internet usage"
+      },
+      {
+        "name": "Basic Word Processing",
+        "type": "Assessment",
+        "total": 25,
+        "description": "Create and edit simple documents"
+      },
+      {
+        "name": "Digital Communication",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Email and messaging etiquette"
+      },
+      {
+        "name": "Information Literacy",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Find and evaluate online information"
+      }
+    ]
+  },
+  {
+    "id": "module-6",
+    "title": "Advanced Mathematics",
+    "levels": ["A&E Secondary"],
+    "predefinedActivities": [
+      {
+        "name": "Algebra Basics",
+        "type": "Assessment",
+        "total": 30,
+        "description": "Introduction to algebraic expressions and equations"
+      },
+      {
+        "name": "Geometry Fundamentals",
+        "type": "Assessment",
+        "total": 25,
+        "description": "Basic geometric shapes, area, and perimeter calculations"
+      },
+      {
+        "name": "Statistics and Probability",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Data analysis, mean, median, mode, and basic probability"
+      },
+      {
+        "name": "Problem Solving",
+        "type": "Assessment",
+        "total": 25,
+        "description": "Real-world mathematical problem solving"
+      },
+      {
+        "name": "Financial Literacy",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Budgeting, interest, and basic financial calculations"
+      }
+    ]
+  },
+  {
+    "id": "module-7",
+    "title": "Advanced Communication",
+    "levels": ["A&E Secondary"],
+    "predefinedActivities": [
+      {
+        "name": "Essay Writing",
+        "type": "Assessment",
+        "total": 30,
+        "description": "Write structured essays with introduction, body, and conclusion"
+      },
+      {
+        "name": "Reading Comprehension",
+        "type": "Assessment",
+        "total": 25,
+        "description": "Analyze and interpret complex texts"
+      },
+      {
+        "name": "Public Speaking",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Deliver presentations and speeches confidently"
+      },
+      {
+        "name": "Research Skills",
+        "type": "Assessment",
+        "total": 25,
+        "description": "Gather, evaluate, and cite information sources"
+      },
+      {
+        "name": "Critical Thinking",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Analyze arguments and form logical conclusions"
+      }
+    ]
+  },
+  {
+    "id": "module-8",
+    "title": "Science and Technology",
+    "levels": ["A&E Secondary"],
+    "predefinedActivities": [
+      {
+        "name": "Basic Biology",
+        "type": "Assessment",
+        "total": 25,
+        "description": "Human body systems and basic life processes"
+      },
+      {
+        "name": "Environmental Science",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Ecosystems, conservation, and environmental issues"
+      },
+      {
+        "name": "Basic Chemistry",
+        "type": "Assessment",
+        "total": 25,
+        "description": "Elements, compounds, and chemical reactions"
+      },
+      {
+        "name": "Physics Concepts",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Motion, energy, and basic physics principles"
+      },
+      {
+        "name": "Technology Applications",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Using technology for learning and productivity"
+      }
+    ]
+  },
+  {
+    "id": "module-9",
+    "title": "Basic Literacy Program",
+    "levels": ["Basic Literacy (BLP)"],
+    "predefinedActivities": [
+      {
+        "name": "Letter Recognition",
+        "type": "Assessment",
+        "total": 26,
+        "description": "Identify and write uppercase and lowercase letters"
+      },
+      {
+        "name": "Basic Reading",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Read simple words and sentences"
+      },
+      {
+        "name": "Number Recognition",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Identify and write numbers 1-50"
+      },
+      {
+        "name": "Basic Writing",
+        "type": "Assessment",
+        "total": 15,
+        "description": "Write simple words and short sentences"
+      },
+      {
+        "name": "Listening Skills",
+        "type": "Assessment",
+        "total": 15,
+        "description": "Follow simple spoken instructions"
+      }
+    ]
+  },
+  {
+    "id": "module-10",
+    "title": "Advanced Learning Skills",
+    "levels": ["ALS Level 2"],
+    "predefinedActivities": [
+      {
+        "name": "Advanced Reading Comprehension",
+        "type": "Assessment",
+        "total": 30,
+        "description": "Analyze complex texts and literature"
+      },
+      {
+        "name": "Advanced Mathematics",
+        "type": "Assessment",
+        "total": 30,
+        "description": "Algebra, geometry, and advanced problem solving"
+      },
+      {
+        "name": "Research and Analysis",
+        "type": "Assessment",
+        "total": 25,
+        "description": "Conduct research and analyze information"
+      },
+      {
+        "name": "Creative Writing",
+        "type": "Assessment",
+        "total": 25,
+        "description": "Write creative and analytical essays"
+      },
+      {
+        "name": "Leadership Skills",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Develop leadership and teamwork abilities"
+      }
+    ]
+  },
+  {
+    "id": "module-11",
+    "title": "Life Skills and Values Education",
+    "levels": ["All Programs"],
+    "predefinedActivities": [
+      {
+        "name": "Personal Development",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Self-awareness and personal growth"
+      },
+      {
+        "name": "Social Skills",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Interpersonal communication and relationships"
+      },
+      {
+        "name": "Work Ethics",
+        "type": "Assessment",
+        "total": 15,
+        "description": "Professional behavior and work values"
+      },
+      {
+        "name": "Community Engagement",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Active participation in community activities"
+      },
+      {
+        "name": "Health and Wellness",
+        "type": "Assessment",
+        "total": 15,
+        "description": "Physical and mental health awareness"
+      }
+    ]
+  },
+  {
+    "id": "module-12",
+    "title": "Digital Citizenship",
+    "levels": ["All Programs"],
+    "predefinedActivities": [
+      {
+        "name": "Digital Literacy",
+        "type": "Assessment",
+        "total": 25,
+        "description": "Basic computer and internet skills"
+      },
+      {
+        "name": "Online Safety",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Safe and responsible internet use"
+      },
+      {
+        "name": "Information Evaluation",
+        "type": "Assessment",
+        "total": 20,
+        "description": "Assess credibility of online information"
+      },
+      {
+        "name": "Digital Communication",
+        "type": "Assessment",
+        "total": 15,
+        "description": "Appropriate online communication"
+      },
+      {
+        "name": "Digital Ethics",
+        "type": "Assessment",
+        "total": 15,
+        "description": "Ethical behavior in digital environments"
+      }
+    ]
+  }
+]

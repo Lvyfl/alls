@@ -1,0 +1,990 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "../styles/accessibility.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Ensure all buttons have cursor pointer */
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* Ensure disabled buttons have not-allowed cursor */
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  /* Responsive base styles */
+  html {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+
+  /* Prevent horizontal scroll on small screens */
+  body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+}
+
+/* React Big Calendar Custom Styles */
+.rbc-calendar {
+  background: white;
+  border-radius: 0 0 8px 8px;
+}
+
+.dark .rbc-calendar {
+  background: #1e293b;
+}
+
+.rbc-header {
+  background-color: #2563eb !important;
+  color: white !important;
+  font-weight: bold;
+  padding: 12px 8px;
+  border: none !important;
+  text-align: center;
+}
+
+.dark .rbc-header {
+  background-color: #1e40af !important;
+}
+
+.rbc-month-view {
+  border: none;
+}
+
+.rbc-date-cell {
+  padding: 8px;
+  text-align: center;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dark .rbc-date-cell {
+  border-right: 1px solid #475569;
+  border-bottom: 1px solid #475569;
+  color: #f8fafc;
+}
+
+.rbc-date-cell.rbc-off-range {
+  color: #9ca3af;
+}
+
+.dark .rbc-date-cell.rbc-off-range {
+  color: #64748b;
+}
+
+.rbc-date-cell.rbc-today {
+  background-color: #dbeafe;
+  font-weight: bold;
+  color: #1d4ed8;
+}
+
+.dark .rbc-date-cell.rbc-today {
+  background-color: #1e3a8a;
+  color: #93c5fd;
+}
+
+.rbc-day-bg {
+  border-right: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dark .rbc-day-bg {
+  border-right: 1px solid #475569;
+  border-bottom: 1px solid #475569;
+}
+
+.rbc-day-bg.rbc-today {
+  background-color: #dbeafe;
+}
+
+.dark .rbc-day-bg.rbc-today {
+  background-color: #1e3a8a;
+}
+
+.rbc-event {
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.rbc-event-label {
+  font-size: 11px;
+}
+
+.rbc-show-more {
+  color: #3b82f6;
+  font-weight: 500;
+  font-size: 11px;
+}
+
+.dark .rbc-show-more {
+  color: #60a5fa;
+}
+
+.rbc-month-row {
+  border: none;
+}
+
+.rbc-row-bg {
+  border: none;
+}
+
+.rbc-row {
+  border: none;
+}
+
+/* Dashboard Viewport Management */
+.dashboard-container {
+  min-height: calc(100vh - 80px); /* Full viewport minus header */
+  height: auto;
+}
+
+.dashboard-main {
+  min-height: calc(100% - 48px); /* Full container minus padding */
+  height: auto;
+}
+
+.dashboard-grid {
+  min-height: 400px; /* Minimum height for grid */
+  height: auto; /* Allow content to expand */
+}
+
+/* Ensure proper scrolling in containers */
+.dashboard-scrollable {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.dark .dashboard-scrollable {
+  scrollbar-color: #475569 #1e293b;
+}
+
+.dashboard-scrollable::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dashboard-scrollable::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.dark .dashboard-scrollable::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.dashboard-scrollable::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.dark .dashboard-scrollable::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.dashboard-scrollable::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark .dashboard-scrollable::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 1023px) {
+  .dashboard-container {
+    min-height: calc(100vh - 100px);
+    height: auto;
+  }
+
+  .dashboard-main {
+    min-height: calc(100vh - 100px);
+    height: auto;
+  }
+
+  .dashboard-grid {
+    min-height: 300px;
+    height: auto;
+    gap: 1rem; /* Reduced gap on mobile */
+  }
+
+  /* Mobile container adjustments */
+  .dashboard-grid > div {
+    min-height: 250px !important; /* Reduced for more compact mobile view */
+    height: auto !important;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .dashboard-grid {
+    min-height: calc(100vh - 180px);
+    gap: 1.25rem; /* Slightly larger gap on tablet */
+  }
+
+  .dashboard-grid > div {
+    min-height: 350px !important; /* Further reduced from 400px for more compact tablet view */
+  }
+}
+
+/* Small mobile devices (320px - 374px) */
+@media (max-width: 374px) {
+  .dashboard-grid {
+    gap: 0.75rem; /* Even smaller gap on very small screens */
+  }
+
+  .dashboard-grid > div {
+    min-height: 280px !important; /* Further reduced from 320px for very small screens */
+  }
+}
+
+/* Large mobile devices (375px - 413px) */
+@media (min-width: 375px) and (max-width: 413px) {
+  .dashboard-grid > div {
+    min-height: 300px !important; /* Further reduced from 340px for more compact view */
+  }
+}
+
+/* Extra large mobile devices (414px+) */
+@media (min-width: 414px) and (max-width: 639px) {
+  .dashboard-grid > div {
+    min-height: 320px !important; /* Further reduced from 370px for more compact view */
+  }
+}
+
+/* Specific height constraints for dashboard components */
+.events-container {
+  min-height: 300px !important;
+  height: auto !important;
+  max-height: 600px !important;
+  overflow: hidden !important;
+}
+
+.events-content {
+  min-height: 200px !important;
+  height: auto !important;
+  max-height: 500px !important;
+  overflow-y: auto !important;
+}
+
+.calendar-container {
+  min-height: 300px !important;
+  height: auto !important;
+  max-height: 600px !important;
+  overflow: hidden !important;
+}
+
+.vision-mission-container {
+  min-height: 300px !important;
+  height: auto !important;
+  max-height: 600px !important;
+  overflow: hidden !important;
+}
+
+@media (max-width: 768px) {
+  .events-container,
+  .calendar-container,
+  .vision-mission-container {
+    min-height: 250px !important;
+    max-height: 400px !important;
+  }
+  
+  .events-content {
+    min-height: 150px !important;
+    max-height: 350px !important;
+  }
+}
+
+/* Fix rounded corners alignment */
+.calendar-container,
+.events-container,
+.vision-mission-container {
+  border-radius: 0.5rem !important; /* 8px */
+}
+
+/* Ensure header backgrounds align perfectly with container borders */
+.calendar-container > div:first-child,
+.events-container > div:first-child {
+  border-top-left-radius: calc(0.5rem - 4px) !important; /* Account for 4px border */
+  border-top-right-radius: calc(0.5rem - 4px) !important;
+  margin: -1px -1px 0 -1px; /* Negative margin to align with border */
+  padding-top: calc(1rem + 1px); /* Adjust padding to compensate */
+  padding-left: calc(1rem + 1px);
+  padding-right: calc(1rem + 1px);
+}
+
+/* Dashboard grid item constraints */
+.dashboard-grid > div {
+  height: auto !important;
+  min-height: 300px !important;
+  max-height: none !important;
+  overflow: hidden !important;
+}
+
+/* Prevent content expansion beyond container */
+.dashboard-grid .events-container,
+.dashboard-grid .calendar-container,
+.dashboard-grid .vision-mission-container {
+  flex-shrink: 0 !important;
+  flex-grow: 1 !important;
+  flex-basis: auto !important;
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 640px) {
+  .dashboard-grid > div {
+    min-height: 250px !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1023px) {
+  .dashboard-grid > div {
+    min-height: 300px !important;
+  }
+}
+
+/* Ensure events list doesn't expand parent */
+.events-content {
+  contain: layout style !important;
+  max-height: 500px !important;
+  overflow-y: auto !important;
+}
+
+@media (max-width: 768px) {
+  .events-content {
+    max-height: 350px !important;
+  }
+}
+
+/* Prevent layout shifts during async loading */
+.dashboard-grid > div {
+  min-height: 300px !important; /* Responsive minimum height */
+  height: auto !important;
+}
+
+@media (min-width: 640px) {
+  .dashboard-grid > div {
+    min-height: 350px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-grid > div {
+    min-height: 400px !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .dashboard-grid > div {
+    min-height: 450px !important;
+  }
+}
+
+/* Loading state height consistency */
+.events-content .text-center {
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Calendar tooltip styles */
+.calendar-tooltip {
+  animation: tooltipFadeIn 0.2s ease-out;
+  backdrop-filter: blur(4px);
+  cursor: default;
+  user-select: text;
+  /* Ensure tooltip stays interactive during scroll */
+  pointer-events: auto;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -100%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%) scale(1);
+  }
+}
+
+/* Mobile-specific component styling */
+@media (max-width: 1023px) {
+  /* Calendar mobile adjustments */
+  .calendar-container .text-2xl {
+    font-size: 1.5rem !important; /* Smaller year text on mobile */
+  }
+
+  .calendar-container .text-xl {
+    font-size: 1.125rem !important; /* Smaller month text on mobile */
+  }
+
+  .calendar-container .text-sm {
+    font-size: 0.75rem !important; /* Smaller subtitle text on mobile */
+  }
+
+  .calendar-container .text-xs {
+    font-size: 0.625rem !important; /* Smaller time text on mobile */
+  }
+
+  /* Events container mobile adjustments */
+  .events-container .text-xl {
+    font-size: 1.125rem !important; /* Smaller header text on mobile */
+  }
+
+  .events-container .text-sm {
+    font-size: 0.75rem !important; /* Smaller date text on mobile */
+  }
+
+  .events-container .p-4 {
+    padding: 0.75rem !important; /* Reduced padding on mobile */
+  }
+
+  /* Vision & Mission mobile adjustments */
+  .vision-mission-container .text-xl {
+    font-size: 1.125rem !important; /* Smaller header text on mobile */
+  }
+
+  .vision-mission-container .text-lg {
+    font-size: 1rem !important; /* Smaller section headers on mobile */
+  }
+
+  .vision-mission-container .p-6 {
+    padding: 1rem !important; /* Reduced padding on mobile */
+  }
+
+  .vision-mission-container .p-4 {
+    padding: 0.75rem !important; /* Reduced header padding on mobile */
+  }
+
+  /* Calendar tooltip mobile adjustments */
+  .calendar-tooltip .max-w-sm {
+    max-width: calc(100vw - 2rem) !important; /* Responsive tooltip width */
+  }
+
+  .calendar-tooltip .p-4 {
+    padding: 0.75rem !important; /* Reduced tooltip padding on mobile */
+  }
+}
+
+/* Extra small mobile adjustments */
+@media (max-width: 374px) {
+  .calendar-container .text-2xl {
+    font-size: 1.25rem !important; /* Even smaller year text */
+  }
+
+  .calendar-container .text-xl {
+    font-size: 1rem !important; /* Even smaller month text */
+  }
+
+  .events-container .text-xl {
+    font-size: 1rem !important; /* Even smaller header text */
+  }
+
+  .vision-mission-container .text-xl {
+    font-size: 1rem !important; /* Even smaller header text */
+  }
+
+  .vision-mission-container .text-lg {
+    font-size: 0.875rem !important; /* Even smaller section headers */
+  }
+}
+
+/* Calendar day hover effects */
+.calendar-day {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Global responsive improvements */
+@media (max-width: 640px) {
+  /* Reduce padding on very small screens */
+  .p-6 {
+    padding: 1rem !important;
+  }
+
+  .p-4 {
+    padding: 0.75rem !important;
+  }
+
+  /* Improve text readability on small screens */
+  .text-2xl {
+    font-size: 1.5rem !important;
+  }
+
+  .text-xl {
+    font-size: 1.25rem !important;
+  }
+
+  .text-lg {
+    font-size: 1.125rem !important;
+  }
+}
+
+/* Table responsive improvements */
+@media (max-width: 768px) {
+  /* Ensure tables are scrollable */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  /* Improve table cell padding on mobile */
+  table th,
+  table td {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.875rem !important;
+  }
+}
+
+/* Mobile responsive tabs styling */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #d1d5db #f3f4f6;
+}
+
+.dark .scrollbar-thin {
+  scrollbar-color: #475569 #1e293b;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 3px;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Smooth scrolling for tabs on mobile */
+@media (max-width: 768px) {
+  .overflow-x-auto {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hide scrollbar on mobile for cleaner look */
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 3px;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.5);
+    border-radius: 3px;
+  }
+
+  /* Improve button sizes on mobile */
+  button {
+    min-height: 44px; /* Better touch target */
+    min-width: 44px;
+  }
+
+  /* Improve input fields on mobile */
+  input,
+  textarea,
+  select {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+}
+
+.calendar-day:hover {
+  transform: scale(1.05);
+}
+
+/* Event type indicators in tooltip */
+.event-type-badge {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Tooltip scrollbar styling */
+.tooltip-scroll {
+  /* Improve scroll interaction */
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+}
+
+.tooltip-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.tooltip-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 2px;
+}
+
+.dark .tooltip-scroll::-webkit-scrollbar-track {
+  background: #334155;
+}
+
+.tooltip-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
+}
+
+.dark .tooltip-scroll::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.tooltip-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark .tooltip-scroll::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Tooltip interaction bridge */
+.calendar-tooltip::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 25px;
+  background: transparent;
+  z-index: -1;
+}
+
+/* Additional interaction area for better UX */
+.calendar-tooltip::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background: transparent;
+  z-index: -2;
+  pointer-events: auto;
+}
+
+/* Leaflet Map Styles */
+@import 'leaflet/dist/leaflet.css';
+
+/* Map container isolation to prevent reuse conflicts */
+.map-wrapper {
+  isolation: isolate;
+  position: relative;
+  z-index: 1;
+}
+
+.map-wrapper .leaflet-container {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Custom map popup styles */
+.leaflet-popup-content-wrapper {
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+  border: 2px solid #2563eb !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.leaflet-popup-tip {
+  border-top-color: #2563eb !important;
+}
+
+.custom-popup .leaflet-popup-content-wrapper {
+  background: white !important;
+}
+
+/* Map container styling */
+.leaflet-container {
+  font-family: inherit !important;
+}
+
+/* Custom marker cluster styles */
+.marker-cluster-small {
+  background-color: rgba(37, 99, 235, 0.6) !important;
+}
+
+.marker-cluster-small div {
+  background-color: rgba(37, 99, 235, 0.8) !important;
+}
+
+.marker-cluster-medium {
+  background-color: rgba(37, 99, 235, 0.7) !important;
+}
+
+.marker-cluster-medium div {
+  background-color: rgba(37, 99, 235, 0.9) !important;
+}
+
+.marker-cluster-large {
+  background-color: rgba(37, 99, 235, 0.8) !important;
+}
+
+.marker-cluster-large div {
+  background-color: #2563eb !important;
+}
+
+/* Map loading animation */
+.map-loading {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Enhanced Sidebar Styles */
+.sidebar-gradient {
+  background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #1d4ed8 100%);
+}
+
+/* Sidebar navigation item hover effects */
+.nav-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.nav-item:hover::before {
+  left: 100%;
+}
+
+/* Smooth scrollbar for sidebar navigation */
+.sidebar-nav {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59, 130, 246, 0.3) transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.3);
+  border-radius: 2px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.5);
+}
+
+/* Tooltip animations */
+.tooltip-enter {
+  animation: tooltipSlideIn 0.2s ease-out;
+}
+
+@keyframes tooltipSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Enhanced button hover effects */
+.btn-hover-lift {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-hover-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Sidebar backdrop blur effect */
+.sidebar-backdrop {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Active navigation indicator animation */
+.nav-indicator {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: 2rem;
+    opacity: 1;
+  }
+}
+
+

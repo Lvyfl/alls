@@ -1,0 +1,192 @@
+[
+  {
+    "id": "event-today-1",
+    "title": "Mathematics Review Session",
+    "date": "2025-05-28",
+    "time": "8:30 AM - 9:30 AM PHT",
+    "type": "orientation",
+    "description": "Advanced mathematics review session covering algebra and geometry concepts",
+    "location": "Classroom A",
+    "status": "upcoming"
+  },
+  {
+    "id": "event-today-2",
+    "title": "Student Progress Consultation",
+    "date": "2025-05-28",
+    "time": "10:00 AM - 11:30 AM PHT",
+    "type": "lesson",
+    "description": "Individual consultation sessions for students to discuss their academic progress",
+    "location": "Guidance Office",
+    "status": "upcoming"
+  },
+  {
+    "id": "event-today-3",
+    "title": "Science Laboratory Session",
+    "date": "2025-05-28",
+    "time": "2:00 PM - 4:00 PM PHT",
+    "type": "orientation",
+    "description": "Hands-on laboratory experiments and scientific method practice",
+    "location": "Science Lab",
+    "status": "upcoming"
+  },
+  {
+    "id": "event-tomorrow-1",
+    "title": "English Communication Skills",
+    "date": "2025-05-29",
+    "time": "9:00 AM - 11:00 AM PHT",
+    "type": "assessment",
+    "description": "LS 1 (English): Improving communication skills and public speaking",
+    "location": "Classroom B",
+    "status": "upcoming"
+  },
+  {
+    "id": "event-tomorrow-2",
+    "title": "Digital Literacy Workshop",
+    "date": "2025-05-29",
+    "time": "1:00 PM - 3:00 PM PHT",
+    "type": "lesson",
+    "description": "LS 6 (Digital Citizenship): Computer skills and internet safety",
+    "location": "Computer Lab",
+    "status": "upcoming"
+  },
+  {
+    "id": "event-1",
+    "title": "New Student Orientation",
+    "date": "2025-05-30",
+    "time": "8:00 AM - 12:00 PM PHT",
+    "type": "orientation",
+    "description": "Welcome orientation for new ALS students covering program overview and expectations",
+    "location": "Main Hall",
+    "status": "upcoming"
+  },
+  {
+    "id": "event-2",
+    "title": "Pre-FLT Assessment",
+    "date": "2025-05-30",
+    "time": "1:00 PM - 3:00 PM PHT",
+    "type": "assessment",
+    "description": "Pre-Functional Literacy Test for all students to assess current skill levels",
+    "location": "Classroom A",
+    "status": "upcoming"
+  },
+  {
+    "id": "event-3",
+    "title": "ALS Forms Workshop",
+    "date": "2025-05-31",
+    "time": "9:00 AM - 12:00 PM PHT",
+    "type": "workshop",
+    "description": "Introduction to ALS Forms and proper filling procedures for students and facilitators",
+    "location": "Computer Lab",
+    "status": "upcoming"
+  },
+  {
+    "id": "event-4",
+    "title": "English Lesson: Main Ideas",
+    "date": "2025-06-02",
+    "time": "10:00 AM - 12:00 PM PHT",
+    "type": "lesson",
+    "description": "LS 1 (English): I Get It - Recognizing the Main Idea",
+    "location": "Classroom B",
+    "status": "upcoming"
+  },
+  {
+    "id": "event-5",
+    "title": "Life Skills: Employment",
+    "date": "2025-06-02",
+    "time": "2:00 PM - 4:00 PM PHT",
+    "type": "lesson",
+    "description": "LS 4 (Life Skills): Road to Employment",
+    "location": "Classroom C",
+    "status": "upcoming"
+  },
+  {
+    "id": "event-6",
+    "title": "Science Workshop",
+    "date": "2025-06-03",
+    "time": "9:00 AM - 11:00 AM PHT",
+    "type": "lesson",
+    "description": "LS 2 (Science): Why Do I Need to Believe in Science?",
+    "location": "Science Lab",
+    "status": "upcoming"
+  },
+  {
+    "id": "event-7",
+    "title": "Understanding Self Workshop",
+    "date": "2025-06-04",
+    "time": "1:00 PM - 3:00 PM PHT",
+    "type": "lesson",
+    "description": "LS 5 (Understanding Self): Reaching Your Full Potential",
+    "location": "Classroom B",
+    "status": "upcoming"
+  },
+  {
+    "id": "event-8",
+    "title": "Digital Citizenship Training",
+    "date": "2025-06-05",
+    "time": "10:00 AM - 12:00 PM PHT",
+    "type": "workshop",
+    "description": "LS 6 (Digital Citizenship): Let's Fix Computers",
+    "location": "Computer Lab",
+    "status": "upcoming"
+  },
+  {
+    "id": "event-9",
+    "title": "Mathematics: Numbers",
+    "date": "2025-06-06",
+    "time": "9:00 AM - 11:00 AM PHT",
+    "type": "lesson",
+    "description": "LS 3 (Mathematics): Meeting the Families of Numbers",
+    "location": "Classroom A",
+    "status": "upcoming"
+  },
+  {
+    "id": "event-10",
+    "title": "Module 1 Assessment",
+    "date": "2025-06-09",
+    "time": "8:00 AM - 12:00 PM PHT",
+    "type": "assessment",
+    "description": "Module 1 comprehensive assessment for all ALS students",
+    "location": "Main Hall",
+    "status": "upcoming"
+  },
+  {
+    "id": "event-11",
+    "title": "Advanced Science Workshop",
+    "date": "2025-06-10",
+    "time": "10:00 AM - 12:00 PM PHT",
+    "type": "lesson",
+    "description": "LS 2 (Science): Advanced Scientific Concepts and Applications",
+    "location": "Science Lab",
+    "status": "upcoming"
+  },
+  {
+    "id": "event-12",
+    "title": "Digital Literacy Training",
+    "date": "2025-06-11",
+    "time": "2:00 PM - 4:00 PM PHT",
+    "type": "workshop",
+    "description": "LS 6 (Digital Citizenship): Computer Skills and Internet Safety",
+    "location": "Computer Lab",
+    "status": "upcoming"
+  },
+  {
+    "id": "event-13",
+    "title": "Business Skills Workshop",
+    "date": "2025-06-12",
+    "time": "1:00 PM - 4:00 PM PHT",
+    "type": "workshop",
+    "description": "LS 4 (Life Skills): Starting a Business and Entrepreneurship",
+    "location": "Conference Room",
+    "status": "upcoming"
+  },
+  {
+    "id": "event-14",
+    "title": "Module 2 Assessment",
+    "date": "2025-06-13",
+    "time": "8:00 AM - 12:00 PM PHT",
+    "type": "assessment",
+    "description": "Module 2 comprehensive assessment covering all learning strands",
+    "location": "Main Hall",
+    "status": "upcoming"
+  }
+]
