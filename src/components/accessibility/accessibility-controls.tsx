@@ -9,7 +9,7 @@ import {
   Type,
   Check,
   RotateCcw,
-  Accessibility,
+  Palette,
   ChevronDown
 } from 'lucide-react';
 
@@ -62,7 +62,7 @@ export function AccessibilityControls({
           title="Accessibility Settings"
           onClick={() => setIsOpen(!isOpen)}
         >
-          <Accessibility className="h-5 w-5" />
+          <Palette className="h-5 w-5" />
           {showLabels && <span className="ml-2 text-sm">Accessibility</span>}
           <ChevronDown className="h-3 w-3 ml-1" />
         </Button>
@@ -71,7 +71,7 @@ export function AccessibilityControls({
           <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
             <div className="p-3 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
-                <Accessibility className="h-4 w-4" />
+                <Palette className="h-4 w-4" />
                 Accessibility Settings
               </div>
             </div>
@@ -154,7 +154,7 @@ export function AccessibilityControls({
     return (
       <div className="bg-theme-surface border-theme-strong border-4 rounded-lg p-4 shadow-lg">
         <div className="flex items-center gap-2 mb-4">
-          <Accessibility className="h-5 w-5 text-primary" />
+          <Palette className="h-5 w-5 text-primary" />
           <h3 className="font-scale-lg font-bold text-theme-primary">
             Accessibility Settings
           </h3>

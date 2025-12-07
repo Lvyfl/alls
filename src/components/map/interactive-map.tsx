@@ -56,7 +56,7 @@ function MapCenterController({ center, zoom }: MapCenterControllerProps) {
 interface InteractiveMapProps {
   barangays: Barangay[];
   selectedBarangay: string | null;
-  enrollmentStats: Record<string, { total: number; active: number }>;
+  enrollmentStats: Record<string, { total: number; active: number; male: number; female: number }>;
   className?: string;
 }
 
@@ -197,7 +197,7 @@ export function InteractiveMap({
         {barangays.map((barangay) => {
           if (!barangay.latitude || !barangay.longitude) return null;
 
-          const stats = enrollmentStats[barangay._id] || { total: 0, active: 0 };
+          const stats = enrollmentStats[barangay._id] || { total: 0, active: 0, male: 0, female: 0 };
 
           return (
             <Marker
@@ -221,6 +221,14 @@ export function InteractiveMap({
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-medium">Active Enrollees:</span>
                       <span className="font-bold text-green-600">{stats.active}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Male:</span>
+                      <span className="font-bold text-gray-700">{stats.male}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">Female:</span>
+                      <span className="font-bold text-gray-700">{stats.female}</span>
                     </div>
                   </div>
                 </div>

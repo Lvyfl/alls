@@ -928,6 +928,7 @@ function StudentActivitySummaryPageContent() {
                           predefinedActivities={module.predefinedActivities || []}
                           // Custom module handler
                           onAddCustomModule={() => handleOpenModuleDialog("create")}
+                          userRole={user?.role}
                         />
                       )}
                     </div>

@@ -31,13 +31,16 @@ export function SchoolCalendar() {
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [startAmpm, setStartAmpm] = useState<'AM' | 'PM'>('AM');
+  const [endTime, setEndTime] = useState('');
+  const [endAmpm, setEndAmpm] = useState<'AM' | 'PM'>('PM');
   const [location, setLocation] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<EventType>('lesson');
   const [status, setStatus] = useState<EventStatus>('upcoming');
   const [isDatePinned, setIsDatePinned] = useState(false);
-  const [errors, setErrors] = useState<{ title?: string; date?: string; time?: string }>({});
+  const [errors, setErrors] = useState<{ title?: string; date?: string; startTime?: string; endTime?: string }>({});
 
   // Helper function to create date string without timezone issues
   const createDateString = (year: number, month: number, day: number): string => {
@@ -172,7 +175,10 @@ export function SchoolCalendar() {
   const resetForm = () => {
     setTitle('');
     setDate('');
-    setTime('');
+    setStartTime('');
+    setStartAmpm('AM');
+    setEndTime('');
+    setEndAmpm('PM');
     setLocation('');
     setDescription('');
     setType('lesson');
@@ -190,7 +196,23 @@ export function SchoolCalendar() {
     setEditingEvent(ev);
     setTitle(ev.title);
     setDate(ev.date);
-    setTime(ev.time);
+    // Parse time to separate start and end times with AM/PM
+    const timeMatch = ev.time.match(/(\d{1,2}:\d{2})\s*(AM|PM)\s*-\s*(\d{1,2}:\d{2})\s*(AM|PM)/i);
+    if (timeMatch) {
+      setStartTime(timeMatch[1]);
+      setStartAmpm(timeMatch[2].toUpperCase() as 'AM' | 'PM');
+      setEndTime(timeMatch[3]);
+      setEndAmpm(timeMatch[4].toUpperCase() as 'AM' | 'PM');
+    } else {
+      // Fallback for existing events with single time format
+      const singleTimeMatch = ev.time.match(/(\d{1,2}:\d{2})\s*(AM|PM)/i);
+      if (singleTimeMatch) {
+        setStartTime(singleTimeMatch[1]);
+        setStartAmpm(singleTimeMatch[2].toUpperCase() as 'AM' | 'PM');
+        setEndTime(singleTimeMatch[1]);
+        setEndAmpm(singleTimeMatch[2].toUpperCase() as 'AM' | 'PM');
+      }
+    }
     setLocation(ev.location);
     setDescription(ev.description);
     setType(ev.type);
@@ -207,10 +229,23 @@ export function SchoolCalendar() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     // Basic validation
-    const validation: { title?: string; date?: string; time?: string } = {};
+    const validation: { title?: string; date?: string; startTime?: string; endTime?: string } = {};
     if (!title) validation.title = 'Title is required';
     if (!date) validation.date = 'Date is required';
-    if (!time) validation.time = 'Time is required';
+    if (!startTime) validation.startTime = 'Start time is required';
+    if (!endTime) validation.endTime = 'End time is required';
+    
+    // Check if date is in the past
+    if (date) {
+      const selectedDate = new Date(date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time to start of day for comparison
+      
+      if (selectedDate < today) {
+        validation.date = 'Cannot select a past date';
+      }
+    }
+    
     setErrors(validation);
     if (Object.keys(validation).length > 0) return;
     setFormSubmitting(true);
@@ -220,7 +255,7 @@ export function SchoolCalendar() {
           ...editingEvent,
           title,
           date,
-          time,
+          time: `${startTime} ${startAmpm} - ${endTime} ${endAmpm} PHT`,
           type,
           description,
           location,
@@ -235,7 +270,7 @@ export function SchoolCalendar() {
         await addEvent({
           title,
           date,
-          time,
+          time: `${startTime} ${startAmpm} - ${endTime} ${endAmpm} PHT`,
           type,
           description,
           location,
@@ -486,13 +521,78 @@ export function SchoolCalendar() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium mb-1">Date</label>
-                    <Input type="date" value={date} onChange={(e) => { setDate(e.target.value); if (errors.date) setErrors(prev => ({ ...prev, date: undefined })); }} />
+                    <Input 
+                      type="date" 
+                      value={date} 
+                      min={new Date().toISOString().split('T')[0]} // Set min date to today
+                      onChange={(e) => { 
+                        setDate(e.target.value); 
+                        if (errors.date) setErrors(prev => ({ ...prev, date: undefined }));
+                        
+                        // Real-time validation for past date
+                        if (e.target.value) {
+                          const selectedDate = new Date(e.target.value);
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          
+                          if (selectedDate < today) {
+                            setErrors(prev => ({ ...prev, date: 'Cannot select a past date' }));
+                          }
+                        }
+                      }} 
+                    />
                     {errors.date && <p className="mt-1 text-xs text-red-600">{errors.date}</p>}
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1">Time</label>
-                    <Input value={time} onChange={(e) => { setTime(e.target.value); if (errors.time) setErrors(prev => ({ ...prev, time: undefined })); }} placeholder="e.g. 8:00 AM - 10:00 AM" />
-                    {errors.time && <p className="mt-1 text-xs text-red-600">{errors.time}</p>}
+                    <div className="space-y-2">
+                      {/* Start Time */}
+                      <div className="flex gap-2 items-center">
+                        <span className="text-xs text-gray-600 w-12">From:</span>
+                        <input 
+                          type="time" 
+                          value={startTime} 
+                          onChange={(e) => { 
+                            setStartTime(e.target.value); 
+                            if (errors.startTime) setErrors(prev => ({ ...prev, startTime: undefined }));
+                          }} 
+                          className="flex-1 rounded-md border border-input bg-background px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm"
+                        />
+                        <Select value={startAmpm} onValueChange={(v) => { setStartAmpm(v as 'AM' | 'PM'); if (errors.startTime) setErrors(prev => ({ ...prev, startTime: undefined })); }}>
+                          <SelectTrigger className="w-20">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="AM">AM</SelectItem>
+                            <SelectItem value="PM">PM</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      {/* End Time */}
+                      <div className="flex gap-2 items-center">
+                        <span className="text-xs text-gray-600 w-12">To:</span>
+                        <input 
+                          type="time" 
+                          value={endTime} 
+                          onChange={(e) => { 
+                            setEndTime(e.target.value); 
+                            if (errors.endTime) setErrors(prev => ({ ...prev, endTime: undefined }));
+                          }} 
+                          className="flex-1 rounded-md border border-input bg-background px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm"
+                        />
+                        <Select value={endAmpm} onValueChange={(v) => { setEndAmpm(v as 'AM' | 'PM'); if (errors.endTime) setErrors(prev => ({ ...prev, endTime: undefined })); }}>
+                          <SelectTrigger className="w-20">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="AM">AM</SelectItem>
+                            <SelectItem value="PM">PM</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    {(errors.startTime || errors.endTime) && <p className="mt-1 text-xs text-red-600">{errors.startTime || errors.endTime}</p>}
                   </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -541,7 +641,7 @@ export function SchoolCalendar() {
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="ghost" onClick={() => { setIsAddOpen(false); resetForm(); }}>Cancel</Button>
-                  <Button type="submit" disabled={formSubmitting || !title || !date || !time || !location || !description}>
+                  <Button type="submit" disabled={formSubmitting || !title || !date || !startTime || !endTime || !location || !description}>
                     {formSubmitting ? 'Saving...' : (editingEvent ? 'Update' : 'Save Event')}
                   </Button>
                 </DialogFooter>

@@ -47,6 +47,9 @@ export const useStudentStore = create<{
   addStudent: (student: Omit<Student, '_id'>) => Promise<Student>;
   editStudent: (student: Student) => Promise<Student>;
   removeStudent: (id: string) => Promise<void>;
+  archiveStudent: (id: string) => Promise<void>;
+  graduateStudent: (id: string) => Promise<void>;
+  retrieveStudent: (id: string) => Promise<void>;
   initializeWithUser: (user: User | null) => Promise<void>;
 }>()(
   immer((set, get) => ({
@@ -271,6 +274,90 @@ export const useStudentStore = create<{
         set(state => {
           state.students.loading = false;
           state.students.error = error instanceof Error ? error.message : 'Failed to delete student';
+        });
+        throw error;
+      }
+    },
+
+    // Archive a student (mark as inactive instead of deleting)
+    archiveStudent: async (id: string) => {
+      set(state => {
+        state.students.loading = true;
+        state.students.error = null;
+      });
+
+      try {
+        const existing = get().students.data.find(s => s._id === id);
+        if (!existing) {
+          throw new Error('Student not found');
+        }
+
+        await updateStudent({
+          ...existing,
+          status: 'inactive',
+        });
+
+        await get().fetchStudents();
+      } catch (error) {
+        set(state => {
+          state.students.loading = false;
+          state.students.error = error instanceof Error ? error.message : 'Failed to archive student';
+        });
+        throw error;
+      }
+    },
+
+    // Graduate a student (mark as graduated)
+    graduateStudent: async (id: string) => {
+      set(state => {
+        state.students.loading = true;
+        state.students.error = null;
+      });
+
+      try {
+        const existing = get().students.data.find(s => s._id === id);
+        if (!existing) {
+          throw new Error('Student not found');
+        }
+
+        await updateStudent({
+          ...existing,
+          status: 'graduated',
+        });
+
+        await get().fetchStudents();
+      } catch (error) {
+        set(state => {
+          state.students.loading = false;
+          state.students.error = error instanceof Error ? error.message : 'Failed to graduate student';
+        });
+        throw error;
+      }
+    },
+
+    // Retrieve a student from archive back to masterlist (mark as active)
+    retrieveStudent: async (id: string) => {
+      set(state => {
+        state.students.loading = true;
+        state.students.error = null;
+      });
+
+      try {
+        const existing = get().students.data.find(s => s._id === id);
+        if (!existing) {
+          throw new Error('Student not found');
+        }
+
+        await updateStudent({
+          ...existing,
+          status: 'active',
+        });
+
+        await get().fetchStudents();
+      } catch (error) {
+        set(state => {
+          state.students.loading = false;
+          state.students.error = error instanceof Error ? error.message : 'Failed to retrieve student';
         });
         throw error;
       }

@@ -471,6 +471,11 @@ export default function AdminManagementPage() {
                     className="border-2 border-blue-600 dark:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                     disabled={isSubmitting}
                   />
+                  {createForm.formState.errors.birthday && (
+                    <p className="text-red-600 dark:text-red-400 text-sm mt-1 font-medium animate-pulse">
+                      ⚠️ {createForm.formState.errors.birthday.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -908,6 +913,11 @@ export default function AdminManagementPage() {
                   className="border-2 border-blue-600 dark:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
                   disabled={isSubmitting}
                 />
+                {editForm.formState.errors.birthday && (
+                  <p className="text-red-600 dark:text-red-400 text-sm mt-1 font-medium animate-pulse">
+                    ⚠️ {editForm.formState.errors.birthday.message}
+                  </p>
+                )}
               </div>
             </div>
 

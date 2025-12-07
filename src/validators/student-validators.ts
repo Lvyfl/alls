@@ -8,7 +8,7 @@ export const studentSchema = z.object({
     .max(12, { message: "LRN must be exactly 12 characters" })
     .regex(/^\d{12}$/, { message: "LRN must contain exactly 12 digits (0-9)" }),
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
-  status: z.enum(['active', 'inactive'] as const),
+  status: z.enum(['active', 'inactive', 'graduated'] as const),
   gender: z.enum(['male', 'female'] as const),
   address: z.string().min(5, { message: "Address must be at least 5 characters" }),
   barangayId: z.string().min(1, { message: "Barangay is required" }),
@@ -45,6 +45,7 @@ export const modalityOptions = [
 export const statusOptions = [
   { value: 'active', label: 'Active' },
   { value: 'inactive', label: 'Inactive' },
+  { value: 'graduated', label: 'Graduated' },
 ];
 
 // Gender options

@@ -35,21 +35,6 @@ export interface LoginCredentials {
   rememberMe?: boolean;
 }
 
-export type PasswordResetRequestStatus = 'pending' | 'accepted' | 'rejected';
-
-export interface PasswordResetRequest {
-  _id: string;
-  userId: string;
-  email: string;
-  role: UserRole;
-  status: PasswordResetRequestStatus;
-  createdAt: string;
-  updatedAt: string;
-  resolvedAt?: string | null;
-  resolvedBy?: string | null;
-  resolvedByName?: string | null;
-}
-
 export interface RegisterCredentials {
   firstName: string;
   middleName?: string;

@@ -122,16 +122,8 @@ export default function ProtectedLayout({
         return;
       }
 
-      try {
-        const requests = await authService.fetchPasswordResetRequests();
-        if (isMounted) {
-          setHasPendingNotifications(
-            requests.some((req: any) => req.status === 'pending')
-          );
-        }
-      } catch (error) {
-        console.error('Error loading password reset notifications:', error);
-      }
+      // Password reset functionality has been removed
+      setHasPendingNotifications(false);
     };
 
     // Initial load

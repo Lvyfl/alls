@@ -12,12 +12,6 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [emailRole, setEmailRole] = useState<UserRole | null>(null);
   const [roleMessage, setRoleMessage] = useState<string>('');
-  const [resetStatus, setResetStatus] = useState<{
-    status: string;
-    bypassApproved: boolean;
-    bypassExpiresAt?: string | null;
-  } | null>(null);
-  const [isRequestingReset, setIsRequestingReset] = useState(false);
 
   // Get auth store actions and state
   const { isLoading, error } = useAuthStoreState();
@@ -51,88 +45,48 @@ export function LoginForm() {
   useEffect(() => {
     let isActive = true;
     setRoleMessage('');
-    setResetStatus(null);
 
-    if (!watchedEmail) {
+    // Handle email change to fetch user role
+    const handleEmailChange = (email: string) => {
       setEmailRole(null);
+      setRoleMessage('');
+      clearError();
+
+      if (!email) return;
+
+      // Debounce the API call
+      const timer = setTimeout(async () => {
+        let isActive = true;
+        
+        try {
+          const users = await authService.getStoredUsers();
+          const matched = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+          
+          if (isActive) {
+            setEmailRole(matched?.role ?? null);
+          }
+        } catch (err) {
+          console.error('Failed to fetch user role for email', err);
+          if (isActive) {
+            setEmailRole(null);
+          }
+        }
+      }, 400);
+
       return () => {
         isActive = false;
+        clearTimeout(timer);
       };
-    }
+    };
 
-    const handler = setTimeout(async () => {
-      try {
-        const users = await authService.getStoredUsers();
-        if (!isActive) return;
-        const matched = users.find(
-          (user) => user.email?.toLowerCase() === watchedEmail.toLowerCase()
-        );
-        setEmailRole(matched?.role ?? null);
-
-        if (matched) {
-          try {
-            const status = await authService.getPasswordResetStatus(
-              matched.email
-            );
-            if (isActive) {
-              setResetStatus(status);
-            }
-          } catch (statusErr) {
-            console.error("Failed to get password reset status", statusErr);
-            if (isActive) {
-              setResetStatus(null);
-            }
-          }
-        } else {
-          setResetStatus(null);
-        }
-      } catch (err) {
-        console.error('Failed to fetch user role for email', err);
-        if (isActive) {
-          setEmailRole(null);
-          setResetStatus(null);
-        }
-      }
-    }, 400);
+    handleEmailChange(watchedEmail);
 
     return () => {
       isActive = false;
-      clearTimeout(handler);
     };
   }, [watchedEmail]);
 
-  const handleForgotPassword = async (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    event.preventDefault();
-
-    if (!watchedEmail) {
-      setRoleMessage('Please enter your email before requesting help.');
-      return;
-    }
-
-    setIsRequestingReset(true);
-    setRoleMessage('');
-    try {
-      const response = await authService.requestPasswordReset(watchedEmail);
-      setRoleMessage(response.message);
-      setResetStatus((prev) => ({
-        status: "pending",
-        bypassApproved: prev?.bypassApproved ?? false,
-        bypassExpiresAt: prev?.bypassExpiresAt,
-      }));
-    } catch (error) {
-      setRoleMessage(
-        error instanceof Error
-          ? error.message
-          : 'Failed to send password reset request'
-      );
-    } finally {
-      setIsRequestingReset(false);
-    }
-  };
-
-  const canShowForgotPassword = emailRole === 'admin';
+  const canShowForgotPassword = false; // Disabled since password reset is removed
 
   // Handle form submission
   const onSubmit = async (data: LoginFormValues) => {
@@ -140,8 +94,7 @@ export function LoginForm() {
       // Clear any previous errors
       clearError();
 
-      const allowPasswordBypass =
-        resetStatus?.bypassApproved && !data.password?.length;
+      const allowPasswordBypass = false; // Disabled since password reset is removed
 
       // Perform login - after successful login, middleware will handle the redirect
       await login({
@@ -216,15 +169,7 @@ export function LoginForm() {
           {errors.password && !!watchedPassword?.length && (
             <p className="mt-1 text-xs sm:text-sm text-red-600">{errors.password.message}</p>
           )}
-          {resetStatus?.bypassApproved && (
-            <p className="mt-1 text-xs sm:text-sm text-green-700">
-              Master admin approved your access. You can log in without entering a password before{" "}
-              {resetStatus.bypassExpiresAt
-                ? new Date(resetStatus.bypassExpiresAt).toLocaleTimeString()
-                : "the approval expires"}
-              .
-            </p>
-          )}
+          {/* Password bypass functionality removed */}
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
@@ -241,18 +186,7 @@ export function LoginForm() {
             </label>
           </div>
 
-          {canShowForgotPassword && (
-            <div className="text-xs sm:text-sm">
-              <button
-                type="button"
-                className="font-medium text-blue-600 hover:text-blue-500 disabled:opacity-50"
-                onClick={handleForgotPassword}
-                disabled={isRequestingReset}
-              >
-                {isRequestingReset ? 'Sending...' : 'Forgot password?'}
-              </button>
-            </div>
-          )}
+          {/* Forgot password functionality removed */}
         </div>
 
         {roleMessage && (

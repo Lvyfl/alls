@@ -1,5 +1,5 @@
 // Common Types
-export type Status = 'active' | 'inactive';
+export type Status = 'active' | 'inactive' | 'graduated';
 export type Gender = 'male' | 'female';
 export type Program = 'Basic Literacy (BLP)' | 'A&E Elementary' | 'A&E Secondary';
 export type Modality = 'Face to Face' | 'Online' | 'Blended';

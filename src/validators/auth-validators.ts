@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { UserRole } from '@/types/auth';
+import { authService } from '@/services/auth-service';
 
 // Login form validation schema
 export const loginSchema = z.object({
@@ -35,7 +36,15 @@ export const registerSchema = z
     email: z
       .string()
       .min(1, { message: 'Email is required' })
-      .email({ message: 'Invalid email address' }),
+      .email({ message: 'Invalid email address' })
+      .refine(async (email) => {
+        try {
+          const users = await authService.getStoredUsers();
+          return !users.some((u) => u.email === email);
+        } catch {
+          return true; // If error checking, allow validation to pass
+        }
+      }, { message: 'Email already taken!' }),
     gender: z
       .string()
       .min(1, { message: 'Gender is required' })
@@ -43,6 +52,26 @@ export const registerSchema = z
     birthday: z
       .string()
       .min(1, { message: 'Birthday is required' })
+      .refine((dateString) => {
+        const birthDate = new Date(dateString);
+        const today = new Date();
+        const age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        // Check if age is at least 18
+        if (age < 18) {
+          return false;
+        }
+        
+        // If exactly 18, check if birthday has passed this year
+        if (age === 18) {
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            return false;
+          }
+        }
+        
+        return true;
+      }, { message: 'Only 18+ years old can have an account!' })
       .optional(),
     role: z
       .enum(['master_admin', 'admin'] as [UserRole, ...UserRole[]])

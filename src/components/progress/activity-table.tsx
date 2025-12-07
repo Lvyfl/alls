@@ -46,6 +46,7 @@ interface ActivityTableProps {
   }>;
   // Custom module handler
   onAddCustomModule?: () => void;
+  userRole?: string;
 }
 
 export function ActivityTable({
@@ -66,7 +67,8 @@ export function ActivityTable({
   // Predefined activities
   predefinedActivities,
   // Custom module handler
-  onAddCustomModule
+  onAddCustomModule,
+  userRole
 }: ActivityTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -201,7 +203,8 @@ export function ActivityTable({
                     )}
                   </div>
                 </div>
-                <Button
+                {userRole !== 'master_admin' && (
+                  <Button
                     onClick={() => handleQuickAddFromPredefined(predefined)}
                     size="sm"
                     variant="outline"
@@ -210,6 +213,7 @@ export function ActivityTable({
                     <Plus className="h-3 w-3" />
                     Quick Add
                   </Button>
+                )}
               </div>
             ))}
           </div>
@@ -220,26 +224,18 @@ export function ActivityTable({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <h3 className="text-lg font-bold text-gray-900 dark:text-white">Recorded Activities</h3>
         <div className="flex flex-wrap gap-2">
-          {onAddCustomModule && (
+
+          {userRole !== 'master_admin' && (
             <Button
-              onClick={onAddCustomModule}
+              onClick={handleAddActivity}
               variant="outline"
               size="sm"
-              className="bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-500 dark:hover:bg-blue-600 border-blue-600 dark:border-blue-700 hover:border-blue-500 dark:hover:border-blue-600 cursor-pointer transition-all duration-200 hover:shadow-md flex items-center gap-2"
+              className="bg-green-600 dark:bg-green-700 text-white hover:bg-green-500 dark:hover:bg-green-600 border-green-600 dark:border-green-700 hover:border-green-500 dark:hover:border-green-600 cursor-pointer transition-all duration-200 hover:shadow-md flex items-center gap-2"
             >
               <span>+</span>
-              <span>Add Custom Module</span>
+              <span>Add Custom Activity</span>
             </Button>
           )}
-          <Button
-            onClick={handleAddActivity}
-            variant="outline"
-            size="sm"
-            className="bg-green-600 dark:bg-green-700 text-white hover:bg-green-500 dark:hover:bg-green-600 border-green-600 dark:border-green-700 hover:border-green-500 dark:hover:border-green-600 cursor-pointer transition-all duration-200 hover:shadow-md flex items-center gap-2"
-          >
-            <span>+</span>
-            <span>Add Custom Activity</span>
-          </Button>
         </div>
       </div>
 
@@ -247,88 +243,92 @@ export function ActivityTable({
       <div className="overflow-x-auto rounded-md border-4 border-blue-600 dark:border-blue-500">
         <div className="min-w-full inline-block align-middle">
           <Table className="min-w-[700px]">
-          <TableHeader>
-            <TableRow className="bg-blue-600 dark:bg-blue-700 hover:bg-blue-600 dark:hover:bg-blue-700">
-              <TableHead className="text-white font-bold text-left border-r-2 border-blue-500 dark:border-blue-400 px-4 py-3">
-                Type of Activity
-              </TableHead>
-              <TableHead className="text-white font-bold text-left border-r-2 border-blue-500 dark:border-blue-400 px-4 py-3">
-                Score
-              </TableHead>
-              <TableHead className="text-white font-bold text-left border-r-2 border-blue-500 dark:border-blue-400 px-4 py-3">
-                Total
-              </TableHead>
-              <TableHead className="text-white font-bold text-left border-r-2 border-blue-500 dark:border-blue-400 px-4 py-3">
-                Date Taken
-              </TableHead>
-              <TableHead className="text-white font-bold text-left border-r-2 border-blue-500 dark:border-blue-400 px-4 py-3">
-                Remarks
-              </TableHead>
-              <TableHead className="text-white font-bold text-left px-4 py-3">
-                Actions
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {hasActivities ? (
-              currentActivities.map((activity, index) => {
-              const actualIndex = startIndex + index; // Get the actual index in the full activities array
-              // Combine type and name into "Type of Activity"
-              const typeOfActivity = `${activity.type}: ${activity.name}`;
-              return (
-                <TableRow
-                  key={actualIndex}
-                  className="hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors border-b border-gray-200 dark:border-gray-600 bg-white dark:bg-slate-800"
-                >
-                  <TableCell className="font-medium border-r border-gray-200 dark:border-gray-600 px-4 py-3 text-gray-900 dark:text-white">
-                    {typeOfActivity}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-200 dark:border-gray-600 px-4 py-3 text-gray-900 dark:text-white">
-                    {activity.score}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-200 dark:border-gray-600 px-4 py-3 text-gray-900 dark:text-white">
-                    {activity.total}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-200 dark:border-gray-600 px-4 py-3 text-gray-900 dark:text-white">
-                    {formatDate(activity.date)}
-                  </TableCell>
-                  <TableCell className="border-r border-gray-200 dark:border-gray-600 px-4 py-3 text-gray-900 dark:text-white">
-                    {activity.remarks || '-'}
-                  </TableCell>
-                  <TableCell className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEditActivity(activity, actualIndex)}
-                        className="bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-500 dark:hover:bg-blue-600 border-blue-600 dark:border-blue-700 hover:border-blue-500 dark:hover:border-blue-600 cursor-pointer transition-all duration-200 hover:shadow-md"
-                        title="Edit Activity"
-                      >
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeleteActivity(activity, actualIndex)}
-                        className="bg-red-600 dark:bg-red-700 text-white hover:bg-red-500 dark:hover:bg-red-600 border-red-600 dark:border-red-700 hover:border-red-500 dark:hover:border-red-600 cursor-pointer transition-all duration-200 hover:shadow-md"
-                        title="Delete Activity"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
+            <TableHeader>
+              <TableRow className="bg-blue-600 dark:bg-blue-700 hover:bg-blue-600 dark:hover:bg-blue-700">
+                <TableHead className="text-white font-bold text-left border-r-2 border-blue-500 dark:border-blue-400 px-4 py-3">
+                  Type of Activity
+                </TableHead>
+                <TableHead className="text-white font-bold text-left border-r-2 border-blue-500 dark:border-blue-400 px-4 py-3">
+                  Score
+                </TableHead>
+                <TableHead className="text-white font-bold text-left border-r-2 border-blue-500 dark:border-blue-400 px-4 py-3">
+                  Total
+                </TableHead>
+                <TableHead className="text-white font-bold text-left border-r-2 border-blue-500 dark:border-blue-400 px-4 py-3">
+                  Date Taken
+                </TableHead>
+                <TableHead className="text-white font-bold text-left border-r-2 border-blue-500 dark:border-blue-400 px-4 py-3">
+                  Remarks
+                </TableHead>
+                {userRole !== 'master_admin' && (
+                  <TableHead className="text-white font-bold text-left px-4 py-3">
+                    Actions
+                  </TableHead>
+                )}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {hasActivities ? (
+                currentActivities.map((activity, index) => {
+                  const actualIndex = startIndex + index; // Get the actual index in the full activities array
+                  // Combine type and name into "Type of Activity"
+                  const typeOfActivity = `${activity.type}: ${activity.name}`;
+                  return (
+                    <TableRow
+                      key={actualIndex}
+                      className="hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors border-b border-gray-200 dark:border-gray-600 bg-white dark:bg-slate-800"
+                    >
+                      <TableCell className="font-medium border-r border-gray-200 dark:border-gray-600 px-4 py-3 text-gray-900 dark:text-white">
+                        {typeOfActivity}
+                      </TableCell>
+                      <TableCell className="border-r border-gray-200 dark:border-gray-600 px-4 py-3 text-gray-900 dark:text-white">
+                        {activity.score}
+                      </TableCell>
+                      <TableCell className="border-r border-gray-200 dark:border-gray-600 px-4 py-3 text-gray-900 dark:text-white">
+                        {activity.total}
+                      </TableCell>
+                      <TableCell className="border-r border-gray-200 dark:border-gray-600 px-4 py-3 text-gray-900 dark:text-white">
+                        {formatDate(activity.date)}
+                      </TableCell>
+                      <TableCell className="text-gray-900 dark:text-white">
+                        {activity.remarks || '-'}
+                      </TableCell>
+                      {userRole !== 'master_admin' && (
+                        <TableCell className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleEditActivity(activity, actualIndex)}
+                              className="bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-500 dark:hover:bg-blue-600 border-blue-600 dark:border-blue-700 hover:border-blue-500 dark:hover:border-blue-600 cursor-pointer transition-all duration-200 hover:shadow-md"
+                              title="Edit Activity"
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteActivity(activity, actualIndex)}
+                              className="bg-red-600 dark:bg-red-700 text-white hover:bg-red-500 dark:hover:bg-red-600 border-red-600 dark:border-red-700 hover:border-red-500 dark:hover:border-red-600 cursor-pointer transition-all duration-200 hover:shadow-md"
+                              title="Delete Activity"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={userRole === 'master_admin' ? 5 : 6} className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    No activities recorded for {moduleTitle} yet.
                   </TableCell>
                 </TableRow>
-              );
-              })
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  No activities recorded for {moduleTitle} yet.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              )}
+            </TableBody>
+          </Table>
         </div>
       </div>
 

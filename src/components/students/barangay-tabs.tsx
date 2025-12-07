@@ -1,4 +1,4 @@
-'use client';
+import { useState, useMemo } from 'react';
 
 import { Barangay } from '@/types';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -20,6 +20,11 @@ export function BarangayTabs({
   allOptionValue = "all",
   allOptionLabel = "All Barangays",
 }: BarangayTabsProps) {
+  // Sort barangays alphabetically
+  const sortedBarangays = useMemo(() => {
+    return [...barangays].sort((a, b) => a.name.localeCompare(b.name));
+  }, [barangays]);
+
   // If no barangays available, don't render anything
   if (barangays.length === 0) {
     return null;
@@ -27,7 +32,7 @@ export function BarangayTabs({
 
   // Handle "all" option: if selectedBarangay is null and showAllOption is true, use "all"
   const hasSelection = selectedBarangay !== null && selectedBarangay !== undefined;
-  const defaultSelection = showAllOption ? allOptionValue : barangays[0]?._id;
+  const defaultSelection = showAllOption ? allOptionValue : sortedBarangays[0]?._id;
 
   // Use the provided selection when available; otherwise, fall back to defaults
   // If showAllOption is true and no selection, default to "all"
@@ -57,7 +62,7 @@ export function BarangayTabs({
                 {allOptionLabel.toUpperCase()}
               </TabsTrigger>
             )}
-            {barangays.map((barangay) => (
+            {sortedBarangays.map((barangay) => (
               <TabsTrigger
                 key={barangay._id}
                 value={barangay._id}

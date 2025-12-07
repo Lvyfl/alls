@@ -7,6 +7,7 @@ import { useStudentStore } from '@/store/student-store';
 import { SchoolCalendar } from '@/components/dashboard/school-calendar';
 import { UpcomingEvents } from '@/components/dashboard/upcoming-events';
 import { VisionMission } from '@/components/dashboard/vision-mission';
+import { StudentsByBarangayChart } from '@/components/dashboard/students-by-barangay-chart';
 // Removed BarangayTabs UI per latest requirements
 import { MapSkeleton } from '@/components/map/map-skeleton';
 import { MapErrorBoundary } from '@/components/map/map-error-boundary';
@@ -89,13 +90,15 @@ export default function DashboardPage() {
 
   // Calculate enrollment statistics for each barangay
   const enrollmentStats = useMemo(() => {
-    const stats: Record<string, { total: number; active: number }> = {};
+    const stats: Record<string, { total: number; active: number; male: number; female: number }> = {};
 
     barangays.forEach(barangay => {
       const barangayStudents = students.data.filter(student => student.barangayId === barangay._id);
       stats[barangay._id] = {
         total: barangayStudents.length,
-        active: barangayStudents.filter(student => student.status === 'active').length
+        active: barangayStudents.filter(student => student.status === 'active').length,
+        male: barangayStudents.filter(student => student.gender === 'male').length,
+        female: barangayStudents.filter(student => student.gender === 'female').length
       };
     });
 
@@ -194,6 +197,11 @@ export default function DashboardPage() {
             Click on map markers to view detailed enrollment information for each barangay.
             Use the tabs above to navigate to specific barangays.
           </p>
+        </div>
+
+        {/* Students per Barangay Chart */}
+        <div className="mt-4 sm:mt-6">
+          <StudentsByBarangayChart students={students.data} barangays={filteredBarangays} />
         </div>
       </div>
     </div>
