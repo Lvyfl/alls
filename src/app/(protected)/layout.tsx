@@ -48,12 +48,12 @@ export default function ProtectedLayout({
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
-      
+
       // Auto-close mobile menu on larger screens
       if (width >= 1024) {
         setIsMobileMenuOpen(false);
       }
-      
+
       // Auto-collapse sidebar on very small screens
       if (width < 640) {
         setIsSidebarOpen(false);
@@ -85,12 +85,13 @@ export default function ProtectedLayout({
     ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
     : user?.name || 'ALS Admin';
   const avatarInitial = (user?.firstName?.[0] || user?.name?.[0] || 'A').toUpperCase();
-  
+
   // Get barangays for displaying assigned barangay name
   const { barangays, fetchBarangays } = useStudentStore();
 
   // Determine navigation items based on user role
-  const navItems = user?.role === 'master_admin'
+  // Include legacy 'master_admin' check for existing users
+  const navItems = (user?.role === 'admin' || (user?.role as string) === 'master_admin')
     ? [...commonNavItems, ...masterAdminNavItems]
     : commonNavItems;
 
@@ -115,7 +116,7 @@ export default function ProtectedLayout({
     let interval: NodeJS.Timeout | null = null;
 
     const loadNotifications = async () => {
-      if (user?.role !== 'master_admin') {
+      if (user?.role !== 'admin' && (user?.role as string) !== 'master_admin') {
         if (isMounted) {
           setHasPendingNotifications(false);
         }
@@ -130,13 +131,13 @@ export default function ProtectedLayout({
     loadNotifications();
 
     // Set up real-time polling for master admin
-    if (user?.role === 'master_admin') {
+    if (user?.role === 'admin' || (user?.role as string) === 'master_admin') {
       // Only poll when page is visible
       const startPolling = () => {
         if (interval) return; // Already polling
-        
-          // Poll every 10 seconds to reduce server load (was 2 seconds)
-          interval = setInterval(loadNotifications, 10000);
+
+        // Poll every 10 seconds to reduce server load (was 2 seconds)
+        interval = setInterval(loadNotifications, 10000);
       };
 
       const stopPolling = () => {
@@ -208,9 +209,8 @@ export default function ProtectedLayout({
 
         {/* Sidebar */}
         <div
-          className={`bg-blue-900 dark:bg-slate-800 text-white ${
-            isSidebarOpen ? 'w-64' : 'w-20'
-          } transition-all duration-300 ease-in-out flex flex-col shadow-2xl relative z-50
+          className={`bg-blue-900 dark:bg-slate-800 text-white ${isSidebarOpen ? 'w-64' : 'w-20'
+            } transition-all duration-300 ease-in-out flex flex-col shadow-2xl relative z-50
           fixed lg:static h-full
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
         >
@@ -297,21 +297,21 @@ export default function ProtectedLayout({
                 )}
 
                 {isSidebarOpen && (() => {
-                  const barangayName = user?.role === 'admin' && user?.assignedBarangayId 
-                    ? getBarangayName(user.assignedBarangayId) 
+                  const barangayName = user?.role === 'teacher' && user?.assignedBarangayId
+                    ? getBarangayName(user.assignedBarangayId)
                     : null;
-                  
+
                   return (
                     <div className="ml-3 flex-1 min-w-0">
                       <p className="text-sm font-semibold text-white truncate">{user?.name || 'Staff Name'}</p>
                       <p className="text-xs text-blue-200 truncate">
-                        {user?.role === 'master_admin' ? 'Master Admin' : 'Regular Admin'}
+                        {(user?.role === 'admin' || (user?.role as string) === 'master_admin') ? 'Admin' : 'Teacher'}
                         {barangayName && (
                           <span className="ml-1 text-blue-300">• {barangayName}</span>
                         )}
                       </p>
-                      <Link 
-                        href="/profile" 
+                      <Link
+                        href="/profile"
                         className="flex items-center text-xs text-blue-300 hover:text-white cursor-pointer mt-1 transition-colors duration-200"
                       >
                         <span>View profile</span>
@@ -346,11 +346,10 @@ export default function ProtectedLayout({
                   <li key={item.name}>
                     <Link
                       href={item.href}
-                      className={`nav-item group relative flex items-center rounded-xl transition-all duration-200 ${
-                        pathname === item.href
-                          ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-900/25"
-                          : "text-blue-100 hover:bg-blue-800/60 hover:text-white"
-                      } ${isSidebarOpen ? "p-3" : "p-3 justify-center"}`}
+                      className={`nav-item group relative flex items-center rounded-xl transition-all duration-200 ${pathname === item.href
+                        ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-900/25"
+                        : "text-blue-100 hover:bg-blue-800/60 hover:text-white"
+                        } ${isSidebarOpen ? "p-3" : "p-3 justify-center"}`}
                       title={!isSidebarOpen ? item.name : undefined}
                       onClick={() => {
                         console.log("Navigation clicked:", item.name, item.href);
@@ -360,15 +359,13 @@ export default function ProtectedLayout({
                       }}
                     >
                       <div
-                        className={`flex items-center justify-center ${
-                          isSidebarOpen ? "relative w-full" : "w-full relative"
-                        }`}
+                        className={`flex items-center justify-center ${isSidebarOpen ? "relative w-full" : "w-full relative"
+                          }`}
                       >
                         <item.icon
                           size={20}
-                          className={`flex-shrink-0 transition-transform duration-200 ${
-                            pathname === item.href ? "scale-110" : "group-hover:scale-105"
-                          }`}
+                          className={`flex-shrink-0 transition-transform duration-200 ${pathname === item.href ? "scale-110" : "group-hover:scale-105"
+                            }`}
                         />
                         {!isSidebarOpen && showNavNotification && (
                           <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
@@ -404,9 +401,8 @@ export default function ProtectedLayout({
           <div className={`${isSidebarOpen ? 'p-4' : 'p-2'} mt-auto`}>
             <button
               onClick={handleLogout}
-              className={`group relative flex items-center w-full text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 ${
-                isSidebarOpen ? 'p-3 justify-start' : 'p-3 justify-center'
-              }`}
+              className={`group relative flex items-center w-full text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 ${isSidebarOpen ? 'p-3 justify-start' : 'p-3 justify-center'
+                }`}
               title={!isSidebarOpen ? 'Log Out' : undefined}
             >
               <LogOut size={18} className="flex-shrink-0" />

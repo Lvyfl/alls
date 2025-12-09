@@ -202,7 +202,7 @@ export function InteractiveMap({
           return (
             <Marker
               key={barangay._id}
-              position={[barangay.latitude, barangay.longitude]}
+              position={[Number(barangay.latitude), Number(barangay.longitude)]}
               icon={blueIcon}
             >
               <Popup className="custom-popup">

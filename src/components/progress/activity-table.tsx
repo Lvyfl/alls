@@ -203,7 +203,7 @@ export function ActivityTable({
                     )}
                   </div>
                 </div>
-                {userRole !== 'master_admin' && (
+                {(userRole !== 'admin' && userRole !== 'master_admin') && (
                   <Button
                     onClick={() => handleQuickAddFromPredefined(predefined)}
                     size="sm"
@@ -225,7 +225,7 @@ export function ActivityTable({
         <h3 className="text-lg font-bold text-gray-900 dark:text-white">Recorded Activities</h3>
         <div className="flex flex-wrap gap-2">
 
-          {userRole !== 'master_admin' && (
+          {(userRole !== 'admin' && userRole !== 'master_admin') && (
             <Button
               onClick={handleAddActivity}
               variant="outline"
@@ -260,7 +260,7 @@ export function ActivityTable({
                 <TableHead className="text-white font-bold text-left border-r-2 border-blue-500 dark:border-blue-400 px-4 py-3">
                   Remarks
                 </TableHead>
-                {userRole !== 'master_admin' && (
+                {(userRole !== 'admin' && userRole !== 'master_admin') && (
                   <TableHead className="text-white font-bold text-left px-4 py-3">
                     Actions
                   </TableHead>
@@ -293,7 +293,7 @@ export function ActivityTable({
                       <TableCell className="text-gray-900 dark:text-white">
                         {activity.remarks || '-'}
                       </TableCell>
-                      {userRole !== 'master_admin' && (
+                      {(userRole !== 'admin' && userRole !== 'master_admin') && (
                         <TableCell className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             <Button
@@ -322,7 +322,7 @@ export function ActivityTable({
                 })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={userRole === 'master_admin' ? 5 : 6} className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <TableCell colSpan={(userRole === 'admin' || userRole === 'master_admin') ? 5 : 6} className="text-center py-8 text-gray-500 dark:text-gray-400">
                     No activities recorded for {moduleTitle} yet.
                   </TableCell>
                 </TableRow>

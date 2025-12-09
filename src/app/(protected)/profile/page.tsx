@@ -68,7 +68,7 @@ export default function ProfilePage() {
       const reader = new FileReader();
       reader.onloadend = async () => {
         const base64String = reader.result as string;
-        
+
         try {
           const response = await fetch('/api/auth/profile-picture', {
             method: 'POST',
@@ -90,12 +90,12 @@ export default function ProfilePage() {
           // Update user in store and storage
           if (data.data && user) {
             const updatedUser = { ...user, profilePicture: data.data.profilePicture };
-            
+
             // Update in Zustand store
             useAuthStore.setState((state) => {
               state.auth.user = updatedUser;
             });
-            
+
             // Also update in localStorage/sessionStorage
             const userKey = 'als_user';
             if (typeof window !== 'undefined') {
@@ -148,12 +148,12 @@ export default function ProfilePage() {
       if (user) {
         const updatedUser = { ...user };
         delete updatedUser.profilePicture;
-        
+
         // Update in Zustand store
         useAuthStore.setState((state) => {
           state.auth.user = updatedUser;
         });
-        
+
         // Also update in localStorage/sessionStorage
         const userKey = 'als_user';
         if (typeof window !== 'undefined') {
@@ -227,14 +227,13 @@ export default function ProfilePage() {
                 </CardTitle>
                 <div className="mt-2">
                   <Badge
-                    variant={user.role === 'master_admin' ? 'default' : 'secondary'}
-                    className={`${
-                      user.role === 'master_admin'
-                        ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-600'
-                        : 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 border-green-300 dark:border-green-600'
-                    }`}
+                    variant={user.role === 'admin' ? 'default' : 'secondary'}
+                    className={`${user.role === 'admin'
+                      ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-600'
+                      : 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 border-green-300 dark:border-green-600'
+                      }`}
                   >
-                    {user.role === 'master_admin' ? 'Master Admin' : 'Regular Admin'}
+                    {user.role === 'admin' ? 'Admin' : 'Teacher'}
                   </Badge>
                 </div>
               </div>
@@ -293,9 +292,7 @@ export default function ProfilePage() {
                     <Shield className="h-4 w-4 mr-2" />
                     Role
                   </p>
-                  <p className="text-base text-gray-900 dark:text-white">
-                    {user.role === 'master_admin' ? 'Master Admin' : 'Regular Admin'}
-                  </p>
+                  {user.role === 'admin' ? 'Admin' : 'Teacher'}
                 </div>
 
                 <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-4">
@@ -304,11 +301,11 @@ export default function ProfilePage() {
                     Assigned Barangay
                   </p>
                   <p className="text-base text-gray-900 dark:text-white">
-                    {user.role === 'admin' && user.assignedBarangayId
+                    {user.role === 'teacher' && user.assignedBarangayId
                       ? getBarangayName(user.assignedBarangayId)
-                      : user.role === 'master_admin'
-                      ? 'All Barangays'
-                      : 'Not assigned'}
+                      : user.role === 'admin'
+                        ? 'All Barangays'
+                        : 'Not assigned'}
                   </p>
                 </div>
 
@@ -333,14 +330,14 @@ export default function ProfilePage() {
                     <Calendar className="h-4 w-4 mr-2" />
                     Account Created
                   </p>
-                    <p className="text-base text-gray-900 dark:text-white">{formatDateWithFallback(user.createdAt)}</p>
+                  <p className="text-base text-gray-900 dark:text-white">{formatDateWithFallback(user.createdAt)}</p>
                 </div>
                 <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-4">
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1 flex items-center">
                     <Calendar className="h-4 w-4 mr-2" />
                     Last Updated
                   </p>
-                    <p className="text-base text-gray-900 dark:text-white">{formatDateWithFallback(user.updatedAt)}</p>
+                  <p className="text-base text-gray-900 dark:text-white">{formatDateWithFallback(user.updatedAt)}</p>
                 </div>
               </div>
             </div>

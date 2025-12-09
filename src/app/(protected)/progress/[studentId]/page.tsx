@@ -35,8 +35,8 @@ const normalizeModuleRecord = (module: any): Module => {
   const levels = Array.isArray(module?.levels)
     ? module.levels
     : module?.levels
-    ? [module.levels]
-    : [];
+      ? [module.levels]
+      : [];
 
   return {
     _id: resolvedId,
@@ -46,11 +46,11 @@ const normalizeModuleRecord = (module: any): Module => {
       .filter(Boolean),
     predefinedActivities: Array.isArray(module?.predefinedActivities)
       ? module.predefinedActivities.map((activity: any) => ({
-          name: activity?.name || "",
-          type: (activity?.type as any) || "Assessment",
-          total: Number(activity?.total) || 0,
-          description: activity?.description || "",
-        }))
+        name: activity?.name || "",
+        type: (activity?.type as any) || "Assessment",
+        total: Number(activity?.total) || 0,
+        description: activity?.description || "",
+      }))
       : [],
   };
 };
@@ -210,7 +210,7 @@ function StudentActivitySummaryPageContent() {
 
   // Get barangays from progress store
   const { barangays } = useProgressStore();
-  
+
   // Get user to access assigned barangay for module filtering
   const { user } = useAuthStoreState();
 
@@ -292,24 +292,24 @@ function StudentActivitySummaryPageContent() {
   useEffect(() => {
     const loadStudent = async () => {
       if (!studentId) return;
-      
+
       setIsInitialLoading(true);
-      
+
       try {
         // First try to find in store
         let foundStudent: Student | null = null;
-        
+
         if (getStudentByLrn) {
           foundStudent = getStudentByLrn(studentId) || null;
         }
-        
+
         // If not found in store, try to fetch from API
         if (!foundStudent) {
           try {
             // Fetch directly from API
             const allStudents = await apiFetchStudents();
             foundStudent = allStudents.find((s) => s.lrn === studentId) || null;
-            
+
             // If found, also ensure store is updated (but don't wait)
             if (fetchStudents && foundStudent) {
               fetchStudents().catch(err => console.error("Error updating store:", err));
@@ -318,7 +318,7 @@ function StudentActivitySummaryPageContent() {
             console.error("Error fetching students from API:", error);
           }
         }
-        
+
         // Final fallback to static data
         if (!foundStudent) {
           const staticStudent = studentsData.find((s) => s.lrn === studentId) as any;
@@ -329,7 +329,7 @@ function StudentActivitySummaryPageContent() {
             } as Student;
           }
         }
-        
+
         setStudent(foundStudent || null);
       } catch (error) {
         console.error("Error loading student:", error);
@@ -338,7 +338,7 @@ function StudentActivitySummaryPageContent() {
         setIsInitialLoading(false);
       }
     };
-    
+
     loadStudent();
   }, [studentId, getStudentByLrn, fetchStudents]); // Include fetchStudents - will use apiFetchStudents as fallback
 
@@ -368,9 +368,9 @@ function StudentActivitySummaryPageContent() {
         // 1. Student's barangay (if student is loaded)
         // 2. Admin's assigned barangay (if admin)
         // 3. null (get all modules)
-        const barangayIdForFilter = student?.barangayId || 
-          (user?.role === 'admin' ? user.assignedBarangayId : undefined);
-        
+        const barangayIdForFilter = student?.barangayId ||
+          (user?.role === 'teacher' ? user.assignedBarangayId : undefined);
+
         const apiModules = await fetchModules(barangayIdForFilter);
         if (apiModules && apiModules.length > 0) {
           setAllModules((prev) =>
@@ -395,8 +395,8 @@ function StudentActivitySummaryPageContent() {
       return;
     }
     // Filter by both program and barangay
-    const barangayId = student?.barangayId || 
-      (user?.role === 'admin' ? user.assignedBarangayId : undefined);
+    const barangayId = student?.barangayId ||
+      (user?.role === 'teacher' ? user.assignedBarangayId : undefined);
     setAvailableModules(filterModulesForProgram(allModules, student?.program, barangayId));
   }, [allModules, student?.program, student?.barangayId, user?.role, user?.assignedBarangayId]);
 
@@ -454,14 +454,14 @@ function StudentActivitySummaryPageContent() {
     async (moduleData: ModuleFormPayload) => {
       try {
         // Determine barangayId: use student's barangay or admin's assigned barangay
-        const barangayId = student?.barangayId || 
-          (user?.role === 'admin' ? user.assignedBarangayId : undefined);
-        
+        const barangayId = student?.barangayId ||
+          (user?.role === 'teacher' ? user.assignedBarangayId : undefined);
+
         const modulePayload = {
           ...moduleData,
           barangayId: barangayId || undefined, // Only include if it exists
         };
-        
+
         const createdModule = await createModule(modulePayload);
         const normalized = normalizeModuleRecord(createdModule);
         setAllModules((prev) => dedupeModulesById([...prev, normalized]));
@@ -480,15 +480,15 @@ function StudentActivitySummaryPageContent() {
       try {
         // Determine barangayId: use student's barangay or admin's assigned barangay
         // Note: For updates, we preserve the existing barangayId unless user is master_admin
-        const barangayId = user?.role === 'master_admin' 
+        const barangayId = user?.role === 'admin'
           ? (student?.barangayId || user.assignedBarangayId || undefined)
           : (student?.barangayId || user?.assignedBarangayId || undefined);
-        
+
         const modulePayload = {
           ...moduleData,
           barangayId: barangayId || undefined, // Only include if it exists
         };
-        
+
         const updatedModule = await updateModule(moduleId, modulePayload);
         const normalized = normalizeModuleRecord(updatedModule);
         setAllModules((prev) =>
@@ -618,7 +618,7 @@ function StudentActivitySummaryPageContent() {
         if (activityIndex === -1) {
           // Check if progress record exists for this module
           const existingProgress = studentProgress.find(p => p.moduleId === selectedModule);
-          
+
           if (existingProgress) {
             // Add activity to existing progress record via API
             const baseUrl = ((globalThis as any).process?.env?.NEXT_PUBLIC_BASE_URL) || '';
@@ -645,7 +645,7 @@ function StudentActivitySummaryPageContent() {
               moduleId: selectedModule,
               activities: [activity]
             };
-            
+
             await createProgress(newProgress as any);
           }
         } else {
@@ -884,10 +884,9 @@ function StudentActivitySummaryPageContent() {
                         min-w-[160px] sm:min-w-[180px] md:min-w-[200px] max-w-full
                         px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border shadow-sm text-xs sm:text-sm md:text-base
                         transition-all duration-200
-                        ${
-                          selectedModule === module._id
-                            ? "!bg-blue-600 dark:!bg-blue-700 !text-white border-blue-600 dark:border-blue-500 shadow-md scale-[1.01]"
-                            : "bg-white dark:bg-slate-800 !text-gray-800 dark:!text-gray-100 border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-slate-700 hover:border-blue-300 dark:hover:border-blue-400"
+                        ${selectedModule === module._id
+                          ? "!bg-blue-600 dark:!bg-blue-700 !text-white border-blue-600 dark:border-blue-500 shadow-md scale-[1.01]"
+                          : "bg-white dark:bg-slate-800 !text-gray-800 dark:!text-gray-100 border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-slate-700 hover:border-blue-300 dark:hover:border-blue-400"
                         }`}
                     >
                       <span className="block leading-snug sm:leading-normal break-words line-clamp-2">

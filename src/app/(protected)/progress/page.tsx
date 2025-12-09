@@ -50,9 +50,9 @@ export default function ProgressPage() {
 
   // Filter barangays based on user role with memoization
   const filteredBarangays = useMemo(() => {
-    return user?.role === 'admin' && user?.assignedBarangayId
-    ? barangays.filter(b => b._id === user.assignedBarangayId)
-    : barangays;
+    return user?.role === 'teacher' && user?.assignedBarangayId
+      ? barangays.filter(b => b._id === user.assignedBarangayId)
+      : barangays;
   }, [barangays, user?.role, user?.assignedBarangayId]);
 
   return (
@@ -63,9 +63,9 @@ export default function ProgressPage() {
       ) : (
         <BarangayTabs
           barangays={filteredBarangays}
-          selectedBarangay={user?.role === 'master_admin' ? selectedBarangay || 'all' : selectedBarangay}
+          selectedBarangay={user?.role === 'admin' ? selectedBarangay || 'all' : selectedBarangay}
           onSelectBarangay={setSelectedBarangay}
-          showAllOption={user?.role === 'master_admin'}
+          showAllOption={user?.role === 'admin'}
         />
       )}
 

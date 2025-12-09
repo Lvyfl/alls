@@ -1,4 +1,4 @@
-export type UserRole = 'master_admin' | 'admin';
+export type UserRole = 'admin' | 'teacher';
 
 export interface User {
   _id: string;
@@ -14,7 +14,7 @@ export interface User {
   gender?: string;
   birthday?: string;
   role: UserRole;
-  assignedBarangayId?: string; // Only for regular admins
+  assignedBarangayId?: string; // Only for teachers
   profilePicture?: string; // Base64 encoded image or URL
   createdAt: string;
   updatedAt: string;

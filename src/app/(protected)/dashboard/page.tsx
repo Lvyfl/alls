@@ -84,7 +84,7 @@ export default function DashboardPage() {
   }, [isMounted, fetchStudents, fetchBarangays]);
 
   // Filter barangays based on user role
-  const filteredBarangays = authUser?.role === 'admin' && authUser?.assignedBarangayId
+  const filteredBarangays = authUser?.role === 'teacher' && authUser?.assignedBarangayId
     ? barangays.filter(b => b._id === authUser.assignedBarangayId)
     : barangays;
 
@@ -200,9 +200,12 @@ export default function DashboardPage() {
         </div>
 
         {/* Students per Barangay Chart */}
-        <div className="mt-4 sm:mt-6">
-          <StudentsByBarangayChart students={students.data} barangays={filteredBarangays} />
-        </div>
+        {/* Students per Barangay Chart - Only for Master Admins */}
+        {authUser?.role === 'admin' && (
+          <div className="mt-4 sm:mt-6">
+            <StudentsByBarangayChart students={students.data} barangays={filteredBarangays} />
+          </div>
+        )}
       </div>
     </div>
   );

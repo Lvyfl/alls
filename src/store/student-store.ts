@@ -120,7 +120,7 @@ export const useStudentStore = create<{
           // Smart barangay selection based on user role
           const fallbackBarangayId = barangays[0]?._id ?? null;
 
-          if (user?.role === 'admin' && user?.assignedBarangayId) {
+          if (user?.role === 'teacher' && user?.assignedBarangayId) {
             const assignedBarangay = barangays.find(b => b._id === user.assignedBarangayId);
             if (assignedBarangay) {
               state.selectedBarangay = assignedBarangay._id;

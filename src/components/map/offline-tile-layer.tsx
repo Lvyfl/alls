@@ -22,7 +22,7 @@ export function OfflineTileLayer({ url, attribution, isOnline }: OfflineTileLaye
 
     // Create custom tile layer with offline support
     const OfflineTileLayerClass = L.TileLayer.extend({
-      createTile: function(coords: L.Coords, done: (error: Error | null, tile?: HTMLElement) => void) {
+      createTile: function (coords: L.Coords, done: (error: Error | null, tile?: HTMLElement) => void) {
         const tile = document.createElement('img');
         const tileUrl = this.getTileUrl(coords);
         const { z, x, y } = coords;
@@ -39,10 +39,10 @@ export function OfflineTileLayer({ url, attribution, isOnline }: OfflineTileLaye
                 const response = await fetch(tileUrl);
                 if (response.ok) {
                   const blob = await response.blob();
-                  
+
                   // Cache the tile for offline use
                   mapTileCache.cacheTile(z, x, y, blob, tileUrl).catch(console.warn);
-                  
+
                   // Create object URL and set as tile source
                   const objectUrl = URL.createObjectURL(blob);
                   tile.onload = () => {
@@ -59,7 +59,7 @@ export function OfflineTileLayer({ url, attribution, isOnline }: OfflineTileLaye
               } catch (networkError) {
                 console.warn(`Network error for tile ${z}/${x}/${y}:`, networkError);
               }
-              
+
               // Network failed, try offline cache
               this.tryOfflineTile(tile, z, x, y, done);
             } else {
@@ -103,23 +103,23 @@ export function OfflineTileLayer({ url, attribution, isOnline }: OfflineTileLaye
           canvas.width = 256;
           canvas.height = 256;
           const ctx = canvas.getContext('2d');
-          
+
           if (ctx) {
             // Draw a simple offline indicator
             ctx.fillStyle = '#f0f0f0';
             ctx.fillRect(0, 0, 256, 256);
-            
+
             ctx.strokeStyle = '#ddd';
             ctx.lineWidth = 1;
             ctx.strokeRect(0, 0, 256, 256);
-            
+
             ctx.fillStyle = '#999';
             ctx.font = '12px Arial';
             ctx.textAlign = 'center';
             ctx.fillText('Offline', 128, 128);
             ctx.fillText('No cached tile', 128, 145);
           }
-          
+
           canvas.toBlob((blob) => {
             if (blob) {
               const objectUrl = URL.createObjectURL(blob);
@@ -152,14 +152,24 @@ export function OfflineTileLayer({ url, attribution, isOnline }: OfflineTileLaye
     });
 
     if (tileLayerRef.current) {
-      map.addLayer(tileLayerRef.current);
+      try {
+        if (map) {
+          map.addLayer(tileLayerRef.current);
+        }
+      } catch (error) {
+        console.warn('Error adding tile layer:', error);
+      }
     }
 
     // Cleanup function
     return () => {
-      if (tileLayerRef.current && map) {
-        map.removeLayer(tileLayerRef.current);
-        tileLayerRef.current = null;
+      try {
+        if (tileLayerRef.current && map) {
+          map.removeLayer(tileLayerRef.current);
+          tileLayerRef.current = null;
+        }
+      } catch (error) {
+        console.warn('Error removing tile layer:', error);
       }
     };
   }, [map, url, attribution, isOnline]);

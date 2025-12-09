@@ -7,7 +7,7 @@ export async function GET(req: Request) {
   try {
     const client = await clientPromise;
     const db = client.db("main");
-    
+
     // Get barangayId from query params (for filtering)
     const { searchParams } = new URL(req.url);
     const barangayId = searchParams.get('barangayId');
@@ -15,14 +15,14 @@ export async function GET(req: Request) {
     // Get user's assigned barangay and role from cookies
     const assignedBarangayId = getCookie(req, 'als_assigned_barangay');
     const userRole = getCookie(req, 'als_user_role');
-    
+
     // Build filter:
     // - For master_admin: preserve existing behavior and allow global modules + barangay-specific
     // - For admin: restrict strictly to their assigned barangay (no global modules)
     // - For unauthenticated/other roles: fall back to barangayId filter or all
     let filter: Record<string, unknown> = {};
 
-    if (userRole === 'admin') {
+    if (userRole === 'teacher') {
       const effectiveBarangayId = barangayId || assignedBarangayId || null;
 
       if (!effectiveBarangayId) {
@@ -39,12 +39,12 @@ export async function GET(req: Request) {
         ? { $or: [{ barangayId: barangayId }, { barangayId: { $exists: false } }] }
         : {};
     }
-    
+
     const modules = await db.collection("modules")
       .find(filter)
       .sort({ title: 1 })
       .toArray();
-    
+
     return NextResponse.json(modules, {
       headers: {
         'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
@@ -95,16 +95,16 @@ export async function POST(req: Request) {
 
     // Determine barangayId: use provided one, or assigned barangay for admins, or null for master_admin
     let barangayId: string | undefined = moduleData.barangayId;
-    
+
     // If admin, use their assigned barangay (override any provided barangayId for security)
-    if (userRole === 'admin' && assignedBarangayId) {
+    if (userRole === 'teacher' && assignedBarangayId) {
       barangayId = assignedBarangayId;
-    } else if (userRole === 'master_admin') {
+    } else if (userRole === 'admin') {
       // Master admin can create modules for any barangay or global modules
       barangayId = moduleData.barangayId || undefined;
-    } else if (userRole === 'admin' && !assignedBarangayId) {
+    } else if (userRole === 'teacher' && !assignedBarangayId) {
       return NextResponse.json(
-        { success: false, error: "Admin must have an assigned barangay to create modules" },
+        { success: false, error: "Teacher must have an assigned barangay to create modules" },
         { status: 403 }
       );
     }
@@ -115,16 +115,16 @@ export async function POST(req: Request) {
       levels: moduleData.levels,
       predefinedActivities: moduleData.predefinedActivities || [],
     };
-    
+
     // Only add barangayId if it's provided (don't add undefined/null)
     if (barangayId) {
       insertData.barangayId = barangayId;
     }
-    
+
     const result = await db.collection("modules").insertOne(insertData);
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       data: {
         _id: result.insertedId.toString(),
         title: insertData.title,
@@ -175,10 +175,10 @@ export async function PATCH(req: Request) {
     }
 
     // Validate admin can only edit modules for their assigned barangay
-    if (userRole === 'admin') {
+    if (userRole === 'teacher') {
       if (!assignedBarangayId) {
         return NextResponse.json(
-          { success: false, error: "Admin must have an assigned barangay to edit modules" },
+          { success: false, error: "Teacher must have an assigned barangay to edit modules" },
           { status: 403 }
         );
       }
@@ -231,11 +231,11 @@ export async function PATCH(req: Request) {
     if (predefinedActivities !== undefined) {
       updatePayload.predefinedActivities = predefinedActivities;
     }
-    
+
     // Handle barangayId update: admins can't change barangayId, master_admin can
-    if (barangayId !== undefined && userRole === 'master_admin') {
+    if (barangayId !== undefined && userRole === 'admin') {
       updatePayload.barangayId = barangayId || null; // Allow setting to null for global modules
-    } else if (userRole === 'admin' && assignedBarangayId) {
+    } else if (userRole === 'teacher' && assignedBarangayId) {
       // Ensure admin's modules stay assigned to their barangay
       updatePayload.barangayId = assignedBarangayId;
     }
@@ -301,7 +301,7 @@ export async function DELETE(req: Request) {
     const userRole = getCookie(req, 'als_user_role');
 
     const isObjectId = ObjectId.isValid(_id);
-    
+
     // First, get the existing module to check its barangayId
     const existingModule = await db.collection("modules").findOne({
       _id: isObjectId ? new ObjectId(_id) : _id
@@ -315,10 +315,10 @@ export async function DELETE(req: Request) {
     }
 
     // Validate admin can only delete modules for their assigned barangay
-    if (userRole === 'admin') {
+    if (userRole === 'teacher') {
       if (!assignedBarangayId) {
         return NextResponse.json(
-          { success: false, error: "Admin must have an assigned barangay to delete modules" },
+          { success: false, error: "Teacher must have an assigned barangay to delete modules" },
           { status: 403 }
         );
       }

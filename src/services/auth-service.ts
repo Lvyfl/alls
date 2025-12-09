@@ -26,7 +26,7 @@ const DEFAULT_USERS: User[] = [
     name: "Master Admin",
     firstName: "Master",
     lastName: "Admin",
-    role: "master_admin",
+    role: "admin",
     createdAt: DEFAULT_TIMESTAMP,
     updatedAt: DEFAULT_TIMESTAMP,
   },
@@ -35,10 +35,10 @@ const DEFAULT_USERS: User[] = [
     email: "regular@example.com",
     password: "RegularAdmin123!",
     initialPassword: "RegularAdmin123!",
-    name: "Regular Admin",
-    firstName: "Regular",
-    lastName: "Admin",
-    role: "admin",
+    name: "Teacher",
+    firstName: "Teacher",
+    lastName: "User",
+    role: "teacher",
     assignedBarangayId: "",
     createdAt: DEFAULT_TIMESTAMP,
     updatedAt: DEFAULT_TIMESTAMP,
@@ -54,7 +54,7 @@ class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
     const url = `${baseUrl}/api/auth/login`;
-    
+
     const res = await fetch(url, {
       method: "POST",
       headers: {
@@ -142,15 +142,14 @@ class AuthService {
     const apiPayload: Omit<User, "_id"> = {
       email: userData.email,
       password: userData.password,
-      name: `${userData.lastName}, ${userData.firstName} ${
-        userData.middleName || ""
-      }`.trim(),
+      name: `${userData.lastName}, ${userData.firstName} ${userData.middleName || ""
+        }`.trim(),
       firstName: userData.firstName,
       lastName: userData.lastName,
       middleName: userData.middleName,
       gender: userData.gender,
       birthday: userData.birthday,
-      role: userData.role || "admin",
+      role: userData.role || "teacher",
       assignedBarangayId: userData.assignedBarangayId,
       createdAt: now,
       updatedAt: now,
@@ -381,7 +380,7 @@ class AuthService {
     try {
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
       const url = `${baseUrl}/api/auth/users`;
-      
+
       const res = await fetch(url, {
         method: "POST",
         headers: {
@@ -454,7 +453,7 @@ class AuthService {
     try {
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
       const url = `${baseUrl}/api/auth/users`;
-      
+
       const res = await fetch(url, {
         method: "PATCH",
         headers: {
@@ -516,7 +515,7 @@ class AuthService {
     try {
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '';
       const url = `${baseUrl}/api/auth/users`;
-      
+
       const res = await fetch(url, {
         method: "DELETE",
         headers: {

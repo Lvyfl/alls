@@ -14,6 +14,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export function SchoolCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date()); // Current month based on local time
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
   const [hoveredDate, setHoveredDate] = useState<string | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [hideTimeout, setHideTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
@@ -127,8 +138,8 @@ export function SchoolCalendar() {
     const today = new Date(); // Current local date
     for (let day = 1; day <= daysInMonth; day++) {
       const isToday = today.getFullYear() === year &&
-                     today.getMonth() === month &&
-                     today.getDate() === day;
+        today.getMonth() === month &&
+        today.getDate() === day;
       calendarDays.push({
         day,
         isCurrentMonth: true,
@@ -234,18 +245,18 @@ export function SchoolCalendar() {
     if (!date) validation.date = 'Date is required';
     if (!startTime) validation.startTime = 'Start time is required';
     if (!endTime) validation.endTime = 'End time is required';
-    
+
     // Check if date is in the past
     if (date) {
       const selectedDate = new Date(date);
       const today = new Date();
       today.setHours(0, 0, 0, 0); // Reset time to start of day for comparison
-      
+
       if (selectedDate < today) {
         validation.date = 'Cannot select a past date';
       }
     }
-    
+
     setErrors(validation);
     if (Object.keys(validation).length > 0) return;
     setFormSubmitting(true);
@@ -521,25 +532,25 @@ export function SchoolCalendar() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium mb-1">Date</label>
-                    <Input 
-                      type="date" 
-                      value={date} 
+                    <Input
+                      type="date"
+                      value={date}
                       min={new Date().toISOString().split('T')[0]} // Set min date to today
-                      onChange={(e) => { 
-                        setDate(e.target.value); 
+                      onChange={(e) => {
+                        setDate(e.target.value);
                         if (errors.date) setErrors(prev => ({ ...prev, date: undefined }));
-                        
+
                         // Real-time validation for past date
                         if (e.target.value) {
                           const selectedDate = new Date(e.target.value);
                           const today = new Date();
                           today.setHours(0, 0, 0, 0);
-                          
+
                           if (selectedDate < today) {
                             setErrors(prev => ({ ...prev, date: 'Cannot select a past date' }));
                           }
                         }
-                      }} 
+                      }}
                     />
                     {errors.date && <p className="mt-1 text-xs text-red-600">{errors.date}</p>}
                   </div>
@@ -549,13 +560,13 @@ export function SchoolCalendar() {
                       {/* Start Time */}
                       <div className="flex gap-2 items-center">
                         <span className="text-xs text-gray-600 w-12">From:</span>
-                        <input 
-                          type="time" 
-                          value={startTime} 
-                          onChange={(e) => { 
-                            setStartTime(e.target.value); 
+                        <input
+                          type="time"
+                          value={startTime}
+                          onChange={(e) => {
+                            setStartTime(e.target.value);
                             if (errors.startTime) setErrors(prev => ({ ...prev, startTime: undefined }));
-                          }} 
+                          }}
                           className="flex-1 rounded-md border border-input bg-background px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm"
                         />
                         <Select value={startAmpm} onValueChange={(v) => { setStartAmpm(v as 'AM' | 'PM'); if (errors.startTime) setErrors(prev => ({ ...prev, startTime: undefined })); }}>
@@ -568,17 +579,17 @@ export function SchoolCalendar() {
                           </SelectContent>
                         </Select>
                       </div>
-                      
+
                       {/* End Time */}
                       <div className="flex gap-2 items-center">
                         <span className="text-xs text-gray-600 w-12">To:</span>
-                        <input 
-                          type="time" 
-                          value={endTime} 
-                          onChange={(e) => { 
-                            setEndTime(e.target.value); 
+                        <input
+                          type="time"
+                          value={endTime}
+                          onChange={(e) => {
+                            setEndTime(e.target.value);
                             if (errors.endTime) setErrors(prev => ({ ...prev, endTime: undefined }));
-                          }} 
+                          }}
                           className="flex-1 rounded-md border border-input bg-background px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm"
                         />
                         <Select value={endAmpm} onValueChange={(v) => { setEndAmpm(v as 'AM' | 'PM'); if (errors.endTime) setErrors(prev => ({ ...prev, endTime: undefined })); }}>
@@ -649,7 +660,7 @@ export function SchoolCalendar() {
             </DialogContent>
           </Dialog>
           <div className="text-xs text-center sm:text-right sm:flex-1">
-            {new Date().toLocaleTimeString('en-US', {
+            {time.toLocaleTimeString('en-US', {
               hour12: true,
               hour: 'numeric',
               minute: '2-digit',
@@ -710,12 +721,11 @@ export function SchoolCalendar() {
                     {dayEvents.slice(0, 3).map((event, eventIndex) => (
                       <div
                         key={eventIndex}
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          event.type === 'orientation' ? 'bg-green-500' :
+                        className={`w-1.5 h-1.5 rounded-full ${event.type === 'orientation' ? 'bg-green-500' :
                           event.type === 'assessment' ? 'bg-amber-500' :
-                          event.type === 'workshop' ? 'bg-purple-500' :
-                          'bg-blue-500'
-                        }`}
+                            event.type === 'workshop' ? 'bg-purple-500' :
+                              'bg-blue-500'
+                          }`}
                         title={event.title}
                       />
                     ))}
@@ -730,7 +740,7 @@ export function SchoolCalendar() {
         </div>
       </div>
 
-      
+
 
       {/* Tooltip */}
       {hoveredDate && (

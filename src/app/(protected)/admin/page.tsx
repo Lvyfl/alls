@@ -63,6 +63,7 @@ export default function AdminManagementPage() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [viewingAdmin, setViewingAdmin] = useState<User | null>(null);
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
 
   // Get barangays from store
   const { barangays, fetchBarangays } = useStudentStore();
@@ -79,7 +80,7 @@ export default function AdminManagementPage() {
       confirmPassword: "",
       gender: "",
       birthday: "",
-      role: "admin",
+      role: "teacher",
       assignedBarangayId: "",
       acceptTerms: true,
     },
@@ -90,7 +91,7 @@ export default function AdminManagementPage() {
 
   // Clear barangay assignment when role changes to master_admin
   useEffect(() => {
-    if (watchedRole === "master_admin") {
+    if (watchedRole === "admin") {
       createForm.setValue("assignedBarangayId", "");
     }
   }, [watchedRole, createForm]);
@@ -108,9 +109,9 @@ export default function AdminManagementPage() {
     },
   });
 
-  // Redirect if not a master admin
+  // Redirect if not a master admin (allow both new 'admin' and legacy 'master_admin')
   useEffect(() => {
-    if (user && user.role !== "master_admin") {
+    if (user && user.role !== "admin" && (user.role as string) !== "master_admin") {
       router.push("/dashboard");
     }
   }, [user, router]);
@@ -118,7 +119,7 @@ export default function AdminManagementPage() {
   // Load barangays and admins
   useEffect(() => {
     // Only load data if current user is a master admin
-    if (!user || user.role !== "master_admin") {
+    if (!user || (user.role !== "admin" && (user.role as string) !== "master_admin")) {
       return;
     }
 
@@ -227,6 +228,7 @@ export default function AdminManagementPage() {
   const openDeleteDialog = (admin: User) => {
     setAdminToDelete(admin);
     setDeleteError(null);
+    setDeleteConfirmationText("");
     setIsDeleteDialogOpen(true);
   };
 
@@ -234,6 +236,7 @@ export default function AdminManagementPage() {
     setIsDeleteDialogOpen(false);
     setAdminToDelete(null);
     setDeleteError(null);
+    setDeleteConfirmationText("");
   };
 
   const openViewDialog = (admin: User) => {
@@ -264,7 +267,7 @@ export default function AdminManagementPage() {
 
 
   return (
-      <div className="space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -487,27 +490,27 @@ export default function AdminManagementPage() {
                   onValueChange={(value) =>
                     createForm.setValue(
                       "role",
-                      value as "master_admin" | "admin"
+                      value as "admin" | "teacher"
                     )
                   }
                   disabled={isSubmitting}
-                  defaultValue="admin"
+                  defaultValue="teacher"
                 >
                   <SelectTrigger className="border-2 border-blue-600 dark:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white">
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent className="bg-white dark:bg-slate-800 border-2 border-blue-600 dark:border-blue-500">
                     <SelectItem
+                      value="teacher"
+                      className="text-gray-900 dark:text-white"
+                    >
+                      Teacher
+                    </SelectItem>
+                    <SelectItem
                       value="admin"
                       className="text-gray-900 dark:text-white"
                     >
-                      Regular Admin
-                    </SelectItem>
-                    <SelectItem
-                      value="master_admin"
-                      className="text-gray-900 dark:text-white"
-                    >
-                      Master Admin
+                      Admin
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -519,7 +522,7 @@ export default function AdminManagementPage() {
               </div>
 
               {/* Only show barangay assignment for Regular Admin */}
-              {watchedRole === "admin" && (
+              {watchedRole === "teacher" && (
                 <div>
                   <Label
                     htmlFor="assignedBarangayId"
@@ -680,26 +683,25 @@ export default function AdminManagementPage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Badge
                           variant={
-                            admin.role === "master_admin"
+                            admin.role === "admin"
                               ? "default"
                               : "secondary"
                           }
-                          className={`${
-                            admin.role === "master_admin"
-                              ? "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-600"
-                              : "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 border-green-300 dark:border-green-600"
-                          }`}
+                          className={`${admin.role === "admin"
+                            ? "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-600"
+                            : "bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 border-green-300 dark:border-green-600"
+                            }`}
                         >
-                          {admin.role === "master_admin"
-                            ? "Master Admin"
-                            : "Regular Admin"}
+                          {admin.role === "admin"
+                            ? "Admin"
+                            : "Teacher"}
                         </Badge>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <MapPin className="h-4 w-4 text-gray-400 mr-2" />
                           <div className="text-sm text-gray-600 dark:text-gray-300">
-                            {admin.role === "admin" && admin.assignedBarangayId
+                            {admin.role === "teacher" && admin.assignedBarangayId
                               ? getBarangayName(admin.assignedBarangayId)
                               : "All Barangays"}
                           </div>
@@ -715,7 +717,8 @@ export default function AdminManagementPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex space-x-2">
-                          {user?.role === "master_admin" && (
+                          {/* Allow both new admin and legacy master_admin to view details */}
+                          {(user?.role === "admin" || (user?.role as string) === "master_admin") && (
                             <Button
                               size="sm"
                               variant="outline"
@@ -733,7 +736,8 @@ export default function AdminManagementPage() {
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          {admin.role !== "master_admin" && (
+                          {/* Allow deletion if the target is NOT self and NOT a legacy master_admin */}
+                          {admin._id !== user?._id && (admin.role as string) !== "master_admin" && (
                             <Button
                               size="sm"
                               variant="outline"
@@ -1062,16 +1066,31 @@ export default function AdminManagementPage() {
             </div>
           )}
 
-          <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
+          <div className="space-y-4 text-sm text-gray-600 dark:text-gray-300">
             <p>
               Only master admins can delete administrator accounts. Please confirm you wish to proceed.
             </p>
             {adminToDelete?.email && (
-              <div className="p-3 rounded border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-slate-700 flex flex-col gap-1">
-                <span className="font-semibold text-gray-900 dark:text-white">
-                  {adminToDelete.name || "Administrator"}
-                </span>
-                <span>{adminToDelete.email}</span>
+              <div className="space-y-4">
+                <div className="p-3 rounded border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-slate-700 flex flex-col gap-1">
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    {adminToDelete.name || "Administrator"}
+                  </span>
+                  <span>{adminToDelete.email}</span>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-gray-900 dark:text-white font-medium">
+                    Type <span className="font-bold select-all">{adminToDelete.email}</span> to confirm:
+                  </p>
+                  <Input
+                    value={deleteConfirmationText}
+                    onChange={(e) => setDeleteConfirmationText(e.target.value)}
+                    placeholder={adminToDelete.email}
+                    className="bg-white dark:bg-slate-700 border-2 border-red-300 dark:border-red-700/50 focus:border-red-600 dark:focus:border-red-500"
+                    autoComplete="off"
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -1089,7 +1108,7 @@ export default function AdminManagementPage() {
             <Button
               type="button"
               onClick={handleDeleteAdmin}
-              disabled={isDeleting || !adminToDelete}
+              disabled={isDeleting || !adminToDelete || deleteConfirmationText !== adminToDelete.email}
               className="bg-red-600 hover:bg-red-700 text-white border-2 border-red-600 hover:border-red-700"
             >
               {isDeleting ? "Deleting..." : "Delete Admin"}

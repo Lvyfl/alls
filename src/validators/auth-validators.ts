@@ -57,25 +57,25 @@ export const registerSchema = z
         const today = new Date();
         const age = today.getFullYear() - birthDate.getFullYear();
         const monthDiff = today.getMonth() - birthDate.getMonth();
-        
+
         // Check if age is at least 18
         if (age < 18) {
           return false;
         }
-        
+
         // If exactly 18, check if birthday has passed this year
         if (age === 18) {
           if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
             return false;
           }
         }
-        
+
         return true;
       }, { message: 'Only 18+ years old can have an account!' })
       .optional(),
     role: z
-      .enum(['master_admin', 'admin'] as [UserRole, ...UserRole[]])
-      .default('admin'),
+      .enum(['admin', 'teacher'] as [UserRole, ...UserRole[]])
+      .default('teacher'),
     assignedBarangayId: z
       .string()
       .optional(),
@@ -97,13 +97,13 @@ export const registerSchema = z
     path: ['confirmPassword'],
   })
   .refine((data) => {
-    // If role is admin, assignedBarangayId is required
-    if (data.role === 'admin') {
+    // If role is teacher, assignedBarangayId is required
+    if (data.role === 'teacher') {
       return !!data.assignedBarangayId;
     }
     return true;
   }, {
-    message: 'Barangay assignment is required for regular admins',
+    message: 'Barangay assignment is required for teachers',
     path: ['assignedBarangayId'],
   });
 

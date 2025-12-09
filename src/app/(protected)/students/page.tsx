@@ -356,7 +356,7 @@ export default function StudentsPage() {
 
   // Filter barangays based on user role with memoization and sort alphabetically
   const filteredBarangays = useMemo(() => {
-    const filtered = user?.role === 'admin' && user?.assignedBarangayId
+    const filtered = user?.role === 'teacher' && user?.assignedBarangayId
       ? barangays.filter(b => b._id === user.assignedBarangayId)
       : barangays;
 
@@ -451,7 +451,7 @@ export default function StudentsPage() {
           )}
         </div>
 
-        {user?.role === 'master_admin' ? (
+        {user?.role === 'admin' ? (
           <Button
             onClick={handleExportExcel}
             className="bg-blue-600 hover:bg-blue-500 text-white cursor-pointer transition-all duration-200 hover:shadow-md"
@@ -467,9 +467,9 @@ export default function StudentsPage() {
       ) : (
         <BarangayTabs
           barangays={filteredBarangays}
-          selectedBarangay={user?.role === 'master_admin' ? selectedBarangay || 'all' : selectedBarangay}
+          selectedBarangay={user?.role === 'admin' ? selectedBarangay || 'all' : selectedBarangay}
           onSelectBarangay={setSelectedBarangay}
-          showAllOption={user?.role === 'master_admin'}
+          showAllOption={user?.role === 'admin'}
         />
       )}
 

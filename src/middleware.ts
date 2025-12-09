@@ -74,8 +74,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // If the route is admin-only and the user is not a master admin, redirect to dashboard
-  if (isMasterAdminRoute && userRole !== 'master_admin') {
+  // If the route is admin-only and the user is not a master admin (or legacy master_admin), redirect to dashboard
+  if (isMasterAdminRoute && userRole !== 'admin' && (userRole as string) !== 'master_admin') {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
@@ -94,8 +94,8 @@ export function middleware(request: NextRequest) {
     // If there's a 'from' parameter and it's a protected route, redirect there
     // This allows users to be redirected back to the page they were trying to access
     if (fromParam &&
-        (protectedRoutes.some(route => fromParam === route || fromParam.startsWith(`${route}/`)) ||
-         (userRole === 'master_admin' && masterAdminRoutes.some(route => fromParam === route || fromParam.startsWith(`${route}/`))))) {
+      (protectedRoutes.some(route => fromParam === route || fromParam.startsWith(`${route}/`)) ||
+        (userRole === 'admin' && masterAdminRoutes.some(route => fromParam === route || fromParam.startsWith(`${route}/`))))) {
       console.log('🎯 Redirecting to original destination:', fromParam);
       return NextResponse.redirect(new URL(fromParam, request.url));
     }
@@ -106,7 +106,7 @@ export function middleware(request: NextRequest) {
   }
 
   // For barangay-specific routes, check if the user has access to the barangay
-  if (pathname.includes('/barangay/') && userRole === 'admin') {
+  if (pathname.includes('/barangay/') && userRole === 'teacher') {
     const barangayIdInUrl = pathname.split('/barangay/')[1]?.split('/')[0];
 
     // If the admin is trying to access a barangay they're not assigned to, redirect to dashboard

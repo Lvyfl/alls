@@ -45,8 +45,8 @@ interface StudentFormProps {
 }
 
 export function StudentForm({ student, barangays, user, onSubmit, onCancel, isSubmitting = false }: StudentFormProps) {
-  // Filter barangays based on user role - Regular Admin can only see their assigned barangay
-  const filteredBarangays = user?.role === 'admin' && user?.assignedBarangayId
+  // Filter barangays based on user role - Teacher can only see their assigned barangay
+  const filteredBarangays = user?.role === 'teacher' && user?.assignedBarangayId
     ? barangays.filter(b => b._id === user.assignedBarangayId)
     : barangays;
 
@@ -65,7 +65,7 @@ export function StudentForm({ student, barangays, user, onSubmit, onCancel, isSu
       status: student?.status || 'active',
       gender: student?.gender || 'male',
       address: student?.address || '',
-      barangayId: student?.barangayId || (user?.role === 'admin' && user?.assignedBarangayId ? user.assignedBarangayId : ''),
+      barangayId: student?.barangayId || (user?.role === 'teacher' && user?.assignedBarangayId ? user.assignedBarangayId : ''),
       program: student?.program || '',
       enrollmentDate: student?.enrollmentDate || new Date().toISOString().split('T')[0],
       modality: student?.modality || 'Face to Face',

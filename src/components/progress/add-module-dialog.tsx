@@ -51,7 +51,7 @@ export function AddModuleDialog({
           // Determine which barangayId to use for filtering:
           // 1. Student's barangay (primary)
           // 2. Admin's assigned barangay (fallback)
-          const barangayIdForFilter = student.barangayId || (user?.role === 'admin' ? user.assignedBarangayId : undefined);
+          const barangayIdForFilter = student.barangayId || (user?.role === 'teacher' ? user.assignedBarangayId : undefined);
 
           // Fetch modules filtered by barangay (backend enforces admin scoping)
           const allModules = await fetchModules(barangayIdForFilter);
@@ -59,8 +59,8 @@ export function AddModuleDialog({
           // Filter modules by student's program
           const filteredModules = allModules.filter(
             (module) =>
-              // Filter by program
-              (module.levels?.includes(student.program) ||
+            // Filter by program
+            (module.levels?.includes(student.program) ||
               module.levels?.includes("All Programs"))
           );
           setModules(filteredModules);
@@ -85,7 +85,7 @@ export function AddModuleDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedModuleId) {
       setError("Please select a module");
       return;

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Student, PredefinedActivity, ActivityType, Module } from '@/types';
+import { useAuthStoreState } from '@/store/auth-store';
 import {
   Dialog,
   DialogContent,
@@ -53,6 +54,10 @@ export function AddCustomModuleDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>('');
   const isEditMode = mode === 'edit' && !!moduleToEdit;
+
+  // Get user role for permissions
+  const { user } = useAuthStoreState();
+  const isAdmin = user?.role === 'admin' || (user?.role as string) === 'master_admin';
 
   // Available program levels
   const programLevels = [
@@ -166,7 +171,7 @@ export function AddCustomModuleDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const validationError = validateForm();
     if (validationError) {
       setError(validationError);
@@ -263,11 +268,10 @@ export function AddCustomModuleDialog({
                   type="button"
                   onClick={() => handleLevelToggle(level)}
                   disabled={isSubmitting}
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${
-                    selectedLevels.includes(level)
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${selectedLevels.includes(level)
                       ? 'bg-blue-600 text-white border-2 border-blue-600'
                       : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-slate-600'
-                  }`}
+                    }`}
                 >
                   {level}
                 </button>
@@ -286,17 +290,19 @@ export function AddCustomModuleDialog({
               <Label className="text-sm font-medium text-gray-900 dark:text-white">
                 Available Activities
               </Label>
-              <Button
-                type="button"
-                onClick={handleAddActivity}
-                size="sm"
-                variant="outline"
-                className="bg-green-600 dark:bg-green-700 text-white hover:bg-green-500 dark:hover:bg-green-600 border-green-600 dark:border-green-700"
-                disabled={isSubmitting}
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Add Activity
-              </Button>
+              {!isAdmin && (
+                <Button
+                  type="button"
+                  onClick={handleAddActivity}
+                  size="sm"
+                  variant="outline"
+                  className="bg-green-600 dark:bg-green-700 text-white hover:bg-green-500 dark:hover:bg-green-600 border-green-600 dark:border-green-700"
+                  disabled={isSubmitting}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add Activity
+                </Button>
+              )}
             </div>
 
             {activities.length === 0 ? (
@@ -316,16 +322,18 @@ export function AddCustomModuleDialog({
                       <h4 className="text-sm font-semibold text-gray-900 dark:text-white">
                         Activity {index + 1}
                       </h4>
-                      <Button
-                        type="button"
-                        onClick={() => handleRemoveActivity(index)}
-                        size="sm"
-                        variant="ghost"
-                        className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                        disabled={isSubmitting}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      {!isAdmin && (
+                        <Button
+                          type="button"
+                          onClick={() => handleRemoveActivity(index)}
+                          size="sm"
+                          variant="ghost"
+                          className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                          disabled={isSubmitting}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -339,7 +347,7 @@ export function AddCustomModuleDialog({
                           onChange={(e) => handleActivityChange(index, 'name', e.target.value)}
                           placeholder="Enter activity name"
                           className="border-2 border-gray-300 dark:border-gray-600 text-sm"
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || isAdmin}
                         />
                       </div>
 
@@ -351,7 +359,7 @@ export function AddCustomModuleDialog({
                         <Select
                           value={activity.type}
                           onValueChange={(value) => handleActivityChange(index, 'type', value as ActivityType)}
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || isAdmin}
                         >
                           <SelectTrigger className="border-2 border-gray-300 dark:border-gray-600 text-sm">
                             <SelectValue />
@@ -380,7 +388,7 @@ export function AddCustomModuleDialog({
                           onChange={(e) => handleActivityChange(index, 'total', parseInt(e.target.value) || 0)}
                           placeholder="Enter total points"
                           className="border-2 border-gray-300 dark:border-gray-600 text-sm"
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || isAdmin}
                         />
                       </div>
 
@@ -394,7 +402,7 @@ export function AddCustomModuleDialog({
                           onChange={(e) => handleActivityChange(index, 'description', e.target.value)}
                           placeholder="Enter activity description (optional)"
                           className="border-2 border-gray-300 dark:border-gray-600 text-sm min-h-[60px]"
-                          disabled={isSubmitting}
+                          disabled={isSubmitting || isAdmin}
                         />
                       </div>
                     </div>

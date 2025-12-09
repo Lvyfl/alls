@@ -49,13 +49,13 @@ export async function POST(req: Request) {
 
     // Find the master admin user
     const masterAdmin = await db.collection("users").findOne({
-      role: "master_admin",
+      role: "admin",
       email: "master@example.com"
     });
 
     if (!masterAdmin) {
       return NextResponse.json(
-        { success: false, error: "Master admin with email 'master@example.com' not found" },
+        { success: false, error: "Admin with email 'master@example.com' not found" },
         { status: 404 }
       );
     }
@@ -105,16 +105,16 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: `Master admin email updated from 'master@example.com' to '${newEmail}'`,
+      message: `Admin email updated from 'master@example.com' to '${newEmail}'`,
       data: {
         ...updatedUser,
         _id: updatedUser._id.toString()
       }
     });
   } catch (error) {
-    console.error("Error updating master admin email:", error);
+    console.error("Error updating admin email:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to update master admin email" },
+      { success: false, error: "Failed to update admin email" },
       { status: 500 }
     );
   }
