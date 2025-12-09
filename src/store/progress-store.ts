@@ -162,7 +162,7 @@ export const useProgressStore = create<{
           // Smart barangay selection based on user role
           const fallbackBarangayId = barangaysData[0]?._id ?? null;
 
-          if (user?.role === "admin" && user?.assignedBarangayId) {
+          if (user?.role === "teacher" && user?.assignedBarangayId) {
             const assignedBarangay = barangaysData.find(
               (b) => b._id === user.assignedBarangayId
             );
@@ -267,10 +267,10 @@ export const useProgressStore = create<{
         );
       }
 
-      // Final validation: ensure all returned students exist in masterlist
-      // This prevents showing students from progress records that aren't in masterlist
+      // Final validation: ensure all returned students exist in masterlist AND are active
+      // This prevents showing students from progress records that aren't in masterlist or are archived/graduated
       const masterlistStudentIds = new Set(students.map(s => s.lrn));
-      filtered = filtered.filter(student => masterlistStudentIds.has(student.lrn));
+      filtered = filtered.filter(student => masterlistStudentIds.has(student.lrn) && student.status === 'active');
 
       return filtered;
     },
