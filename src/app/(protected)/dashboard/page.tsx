@@ -201,7 +201,7 @@ export default function DashboardPage() {
 
         {/* Students per Barangay Chart */}
         {/* Students per Barangay Chart - Only for Master Admins */}
-        {authUser?.role === 'admin' && (
+        {(authUser?.role === 'admin' || (authUser?.role as string) === 'master_admin') && (
           <div className="mt-4 sm:mt-6">
             <StudentsByBarangayChart students={students.data} barangays={filteredBarangays} />
           </div>

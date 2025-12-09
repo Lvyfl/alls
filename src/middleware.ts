@@ -95,7 +95,7 @@ export function middleware(request: NextRequest) {
     // This allows users to be redirected back to the page they were trying to access
     if (fromParam &&
       (protectedRoutes.some(route => fromParam === route || fromParam.startsWith(`${route}/`)) ||
-        (userRole === 'admin' && masterAdminRoutes.some(route => fromParam === route || fromParam.startsWith(`${route}/`))))) {
+        ((userRole === 'admin' || (userRole as string) === 'master_admin') && masterAdminRoutes.some(route => fromParam === route || fromParam.startsWith(`${route}/`))))) {
       console.log('🎯 Redirecting to original destination:', fromParam);
       return NextResponse.redirect(new URL(fromParam, request.url));
     }
