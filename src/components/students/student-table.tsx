@@ -169,7 +169,7 @@ export const StudentTable = memo(function StudentTable({
   return (
     <div className="rounded-md border border-gray-200 dark:border-gray-600 overflow-x-auto">
       <div className="min-w-full inline-block align-middle">
-        <Table className="min-w-[800px] table-fixed">
+        <Table className="min-w-[1000px] table-auto">
           <TableHeader className="bg-blue-600 dark:bg-blue-700">
             <TableRow>
               <TableHead className="text-white font-bold w-12 text-center">
@@ -180,7 +180,7 @@ export const StudentTable = memo(function StudentTable({
                 />
               </TableHead>
               <TableHead
-                className="text-white font-bold cursor-pointer"
+                className="text-white font-bold cursor-pointer w-[120px]"
                 onClick={() => handleSort('lrn')}
               >
                 LRN
@@ -188,11 +188,11 @@ export const StudentTable = memo(function StudentTable({
                   <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                 )}
               </TableHead>
-              <TableHead className="text-white font-bold">
+              <TableHead className="text-white font-bold text-center min-w-[200px]">
                 NAME
               </TableHead>
               <TableHead
-                className="text-white font-bold cursor-pointer w-[120px]"
+                className="text-white font-bold cursor-pointer w-[140px]"
                 onClick={() => handleSort('status')}
               >
                 STATUS
@@ -201,7 +201,7 @@ export const StudentTable = memo(function StudentTable({
                 )}
               </TableHead>
               <TableHead
-                className="text-white font-bold cursor-pointer"
+                className="text-white font-bold cursor-pointer w-[100px]"
                 onClick={() => handleSort('gender')}
               >
                 GENDER
@@ -210,7 +210,7 @@ export const StudentTable = memo(function StudentTable({
                 )}
               </TableHead>
               <TableHead
-                className="text-white font-bold cursor-pointer"
+                className="text-white font-bold cursor-pointer min-w-[150px]"
                 onClick={() => handleSort('address')}
               >
                 BARANGAY
@@ -218,7 +218,7 @@ export const StudentTable = memo(function StudentTable({
                   <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                 )}
               </TableHead>
-              <TableHead className="text-white font-bold text-center">
+              <TableHead className="text-white font-bold text-center w-[180px]">
                 ACTION
               </TableHead>
             </TableRow>
@@ -243,9 +243,9 @@ export const StudentTable = memo(function StudentTable({
                       className="border-gray-300 dark:border-gray-600"
                     />
                   </TableCell>
-                  <TableCell className="font-medium text-gray-900 dark:text-white">{student.lrn}</TableCell>
-                  <TableCell className="text-gray-900 dark:text-white">{formatStudentName(student.name)}</TableCell>
-                  <TableCell>
+                  <TableCell className="font-medium text-gray-900 dark:text-white w-[120px]">{student.lrn}</TableCell>
+                  <TableCell className="text-center text-gray-900 dark:text-white break-words min-w-[200px]">{formatStudentName(student.name)}</TableCell>
+                  <TableCell className="w-[140px]">
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${student.status === 'active'
                       ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                       : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
@@ -253,9 +253,9 @@ export const StudentTable = memo(function StudentTable({
                       {student.status.toUpperCase()}
                     </span>
                   </TableCell>
-                  <TableCell className="text-gray-900 dark:text-white">{student.gender ? student.gender.toUpperCase() : 'N/A'}</TableCell>
-                  <TableCell className="text-gray-900 dark:text-white">{barangayNameMap.get(student.barangayId) || 'N/A'}</TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="text-gray-900 dark:text-white w-[100px]">{student.gender ? student.gender.toUpperCase() : 'N/A'}</TableCell>
+                  <TableCell className="text-gray-900 dark:text-white min-w-[150px]">{barangayNameMap.get(student.barangayId) || 'N/A'}</TableCell>
+                  <TableCell className="text-center w-[180px]">
                     <div className="flex justify-center space-x-2">
                       <Button
                         size="icon"

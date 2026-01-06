@@ -26,10 +26,11 @@ export async function GET(req: Request) {
       const effectiveBarangayId = barangayId || assignedBarangayId || null;
 
       if (!effectiveBarangayId) {
-        // Admin without a barangay should not see any modules
+        // Teacher without a barangay should not see any modules
         filter = { _id: null };
       } else {
-        filter = { barangayId: effectiveBarangayId };
+        // Teachers should see modules for their barangay AND global modules (without barangayId)
+        filter = { $or: [{ barangayId: effectiveBarangayId }, { barangayId: { $exists: false } }] };
       }
     } else {
       // Master admin or other roles
@@ -45,9 +46,17 @@ export async function GET(req: Request) {
       .sort({ title: 1 })
       .toArray();
 
-    return NextResponse.json(modules, {
+    // Ensure all modules have consistent structure (createdAt is optional for backward compatibility)
+    const normalizedModules = modules.map((module: any) => ({
+      ...module,
+      _id: module._id?.toString() || module._id,
+      // createdAt is optional - existing modules without it will still work
+      createdAt: module.createdAt || undefined,
+    }));
+
+    return NextResponse.json(normalizedModules, {
       headers: {
-        'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
       },
     });
   } catch (e) {
@@ -114,6 +123,7 @@ export async function POST(req: Request) {
       title: moduleData.title.trim(),
       levels: moduleData.levels,
       predefinedActivities: moduleData.predefinedActivities || [],
+      createdAt: new Date().toISOString(), // Add creation timestamp
     };
 
     // Only add barangayId if it's provided (don't add undefined/null)
@@ -130,7 +140,8 @@ export async function POST(req: Request) {
         title: insertData.title,
         levels: insertData.levels,
         predefinedActivities: insertData.predefinedActivities,
-        barangayId: insertData.barangayId
+        barangayId: insertData.barangayId,
+        createdAt: insertData.createdAt
       }
     });
   } catch (error: any) {
@@ -247,6 +258,12 @@ export async function PATCH(req: Request) {
       );
     }
 
+    // Preserve createdAt if it exists and is not being updated
+    if (!updatePayload.createdAt && existingModule?.createdAt) {
+      // Don't include createdAt in updatePayload, it will be preserved automatically
+      // MongoDB $set only updates specified fields, so createdAt will remain
+    }
+
     const result = await db.collection("modules").findOneAndUpdate(
       filter,
       { $set: updatePayload },
@@ -264,6 +281,8 @@ export async function PATCH(req: Request) {
     const updatedDocument = result.value ?? {
       _id: result.lastErrorObject?.upserted || filter._id,
       ...updatePayload,
+      // Preserve createdAt from existing module if not in updatePayload
+      createdAt: updatePayload.createdAt || existingModule?.createdAt,
     };
 
     return NextResponse.json({
@@ -271,6 +290,8 @@ export async function PATCH(req: Request) {
       data: {
         ...updatedDocument,
         _id: updatedDocument._id?.toString?.() ?? updatedDocument._id,
+        // Ensure createdAt is included in response
+        createdAt: updatedDocument.createdAt || existingModule?.createdAt,
       }
     });
   } catch (error) {

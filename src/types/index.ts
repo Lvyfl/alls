@@ -71,6 +71,7 @@ export interface Module {
   levels: string[];
   predefinedActivities?: PredefinedActivity[];
   barangayId?: string; // Optional: if not set, module is available to all barangays (for backward compatibility)
+  createdAt?: string; // ISO date string for when the module was created
 }
 
 // Activity Interface

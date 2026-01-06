@@ -52,7 +52,27 @@ const normalizeModuleRecord = (module: any): Module => {
         description: activity?.description || "",
       }))
       : [],
+    barangayId: module?.barangayId,
+    createdAt: module?.createdAt,
   };
+};
+
+// Helper function to check if a module is new (created within last 7 days)
+const isModuleNew = (module: Module): boolean => {
+  if (!module.createdAt) return false;
+  try {
+    const createdAt = new Date(module.createdAt);
+    // Validate date is valid
+    if (isNaN(createdAt.getTime())) return false;
+    const now = new Date();
+    const daysDiff = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24);
+    // Check if module is between 0 and 7 days old
+    return daysDiff >= 0 && daysDiff <= 7;
+  } catch (error) {
+    // Silently fail - don't show badge if there's any error
+    console.warn('Error checking if module is new:', error);
+    return false;
+  }
 };
 
 const dedupeModulesById = (modules: Module[]): Module[] => {
@@ -876,24 +896,34 @@ function StudentActivitySummaryPageContent() {
               <div className="border-b border-gray-300 dark:border-gray-600">
                 {/* Responsive, wrapping module cards */}
                 <TabsList className="w-full !bg-transparent !h-auto rounded-none p-0 flex flex-wrap gap-2 sm:gap-3 justify-start items-stretch">
-                  {availableModules.map((module) => (
-                    <TabsTrigger
-                      key={module._id}
-                      value={module._id}
-                      className={`flex flex-col items-start justify-between text-left font-semibold whitespace-normal break-words
-                        min-w-[160px] sm:min-w-[180px] md:min-w-[200px] max-w-full
-                        px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border shadow-sm text-xs sm:text-sm md:text-base
-                        transition-all duration-200
-                        ${selectedModule === module._id
-                          ? "!bg-blue-600 dark:!bg-blue-700 !text-white border-blue-600 dark:border-blue-500 shadow-md scale-[1.01]"
-                          : "bg-white dark:bg-slate-800 !text-gray-800 dark:!text-gray-100 border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-slate-700 hover:border-blue-300 dark:hover:border-blue-400"
-                        }`}
-                    >
-                      <span className="block leading-snug sm:leading-normal break-words line-clamp-2">
-                        {module.title}
-                      </span>
-                    </TabsTrigger>
-                  ))}
+                  {availableModules.map((module) => {
+                    const isNew = isModuleNew(module);
+                    return (
+                      <TabsTrigger
+                        key={module._id}
+                        value={module._id}
+                        className={`flex flex-col items-start justify-between text-left font-semibold whitespace-normal break-words
+                          min-w-[160px] sm:min-w-[180px] md:min-w-[200px] max-w-full
+                          px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border shadow-sm text-xs sm:text-sm md:text-base
+                          transition-all duration-200 relative
+                          ${selectedModule === module._id
+                            ? "!bg-blue-600 dark:!bg-blue-700 !text-white border-blue-600 dark:border-blue-500 shadow-md scale-[1.01]"
+                            : "bg-white dark:bg-slate-800 !text-gray-800 dark:!text-gray-100 border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-slate-700 hover:border-blue-300 dark:hover:border-blue-400"
+                          }`}
+                      >
+                        <div className="flex items-start gap-2 w-full">
+                          <span className="block leading-snug sm:leading-normal break-words line-clamp-2 flex-1">
+                            {module.title}
+                          </span>
+                          {isNew && (
+                            <span className="flex-shrink-0 inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-green-500 text-white dark:bg-green-600 dark:text-white shadow-sm" title="New module">
+                              NEW
+                            </span>
+                          )}
+                        </div>
+                      </TabsTrigger>
+                    );
+                  })}
                 </TabsList>
               </div>
 

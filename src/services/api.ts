@@ -68,11 +68,13 @@ export const fetchModules = async (barangayId?: string): Promise<Module[]> => {
       ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/modules?barangayId=${encodeURIComponent(barangayId)}`
       : `${process.env.NEXT_PUBLIC_BASE_URL}/api/modules`;
 
-    // Fetch modules from API
+    // Fetch modules from API with no cache to ensure fresh data
     const res = await fetch(url, {
       method: "GET",
-      cache: "default",
-      next: { revalidate: 30 }
+      cache: "no-store",
+      headers: {
+        'Cache-Control': 'no-cache',
+      }
     });
 
     // check if the response is successful
@@ -119,6 +121,7 @@ export const createModule = async (moduleData: ModulePayload & { barangayId?: st
       levels: payload.levels ?? moduleData.levels,
       predefinedActivities: payload.predefinedActivities ?? moduleData.predefinedActivities,
       barangayId: payload.barangayId ?? moduleData.barangayId,
+      createdAt: payload.createdAt,
     };
   } catch (error) {
     console.error("Error creating module:", error);
@@ -155,6 +158,7 @@ export const updateModule = async (_id: string, moduleData: ModulePayload & { ba
       levels: payload.levels ?? moduleData.levels,
       predefinedActivities: payload.predefinedActivities ?? moduleData.predefinedActivities,
       barangayId: payload.barangayId ?? moduleData.barangayId,
+      createdAt: payload.createdAt,
     };
   } catch (error) {
     console.error("Error updating module:", error);

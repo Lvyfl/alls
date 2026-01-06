@@ -80,7 +80,7 @@ export const ProgressTable = memo(function ProgressTable({
             <TableHead className="text-white font-bold text-left">
               LEARNER'S ID NO.
             </TableHead>
-            <TableHead className="text-white font-bold text-left">
+            <TableHead className="text-white font-bold text-center">
               NAME
             </TableHead>
             <TableHead className="text-white font-bold text-left">
@@ -104,7 +104,7 @@ export const ProgressTable = memo(function ProgressTable({
               <TableCell className="text-left font-medium text-gray-900 dark:text-white">
                 {student.lrn}
               </TableCell>
-                     <TableCell className="text-left text-gray-900 dark:text-white">
+                     <TableCell className="text-center text-gray-900 dark:text-white">
                        {formatStudentName(student.name)}
                      </TableCell>
               <TableCell className="text-left text-gray-900 dark:text-white">

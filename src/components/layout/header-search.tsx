@@ -21,7 +21,14 @@ export function HeaderSearch() {
     if (pathname.includes('/students')) {
       setCurrentPage('students');
     } else if (pathname.includes('/progress')) {
-      setCurrentPage('progress');
+      // Check if we're on a specific student's progress page (e.g., /progress/[studentId])
+      const progressMatch = pathname.match(/^\/progress\/(.+)$/);
+      if (progressMatch) {
+        // This is a student-specific progress page, don't show search
+        setCurrentPage(null);
+      } else {
+        setCurrentPage('progress');
+      }
     } else if (pathname.includes('/dashboard')) {
       setCurrentPage('dashboard');
     } else if (pathname.includes('/map')) {

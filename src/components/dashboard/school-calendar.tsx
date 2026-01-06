@@ -12,6 +12,45 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+// Helper function to convert 12-hour format to 24-hour format for HTML5 time input
+const convertTo24Hour = (time12: string, ampm: 'AM' | 'PM'): string => {
+  const [hours, minutes] = time12.split(':').map(Number);
+  let hours24 = hours;
+  
+  if (ampm === 'AM' && hours === 12) {
+    hours24 = 0;
+  } else if (ampm === 'PM' && hours !== 12) {
+    hours24 = hours + 12;
+  }
+  
+  return `${hours24.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+};
+
+// Helper function to convert 24-hour format to 12-hour format
+const convertTo12Hour = (time24: string): { time: string; ampm: 'AM' | 'PM' } => {
+  const [hours24, minutes] = time24.split(':').map(Number);
+  let hours12 = hours24;
+  let ampm: 'AM' | 'PM' = 'AM';
+  
+  if (hours24 === 0) {
+    hours12 = 12;
+    ampm = 'AM';
+  } else if (hours24 === 12) {
+    hours12 = 12;
+    ampm = 'PM';
+  } else if (hours24 > 12) {
+    hours12 = hours24 - 12;
+    ampm = 'PM';
+  } else {
+    ampm = 'AM';
+  }
+  
+  return {
+    time: `${hours12}:${minutes.toString().padStart(2, '0')}`,
+    ampm
+  };
+};
+
 export function SchoolCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date()); // Current month based on local time
   const [time, setTime] = useState(new Date());
@@ -210,18 +249,27 @@ export function SchoolCalendar() {
     // Parse time to separate start and end times with AM/PM
     const timeMatch = ev.time.match(/(\d{1,2}:\d{2})\s*(AM|PM)\s*-\s*(\d{1,2}:\d{2})\s*(AM|PM)/i);
     if (timeMatch) {
-      setStartTime(timeMatch[1]);
-      setStartAmpm(timeMatch[2].toUpperCase() as 'AM' | 'PM');
-      setEndTime(timeMatch[3]);
-      setEndAmpm(timeMatch[4].toUpperCase() as 'AM' | 'PM');
+      const startTime12 = timeMatch[1];
+      const startAmpmValue = timeMatch[2].toUpperCase() as 'AM' | 'PM';
+      const endTime12 = timeMatch[3];
+      const endAmpmValue = timeMatch[4].toUpperCase() as 'AM' | 'PM';
+      
+      // Convert to 24-hour format for HTML5 time input
+      setStartTime(convertTo24Hour(startTime12, startAmpmValue));
+      setStartAmpm(startAmpmValue);
+      setEndTime(convertTo24Hour(endTime12, endAmpmValue));
+      setEndAmpm(endAmpmValue);
     } else {
       // Fallback for existing events with single time format
       const singleTimeMatch = ev.time.match(/(\d{1,2}:\d{2})\s*(AM|PM)/i);
       if (singleTimeMatch) {
-        setStartTime(singleTimeMatch[1]);
-        setStartAmpm(singleTimeMatch[2].toUpperCase() as 'AM' | 'PM');
-        setEndTime(singleTimeMatch[1]);
-        setEndAmpm(singleTimeMatch[2].toUpperCase() as 'AM' | 'PM');
+        const time12 = singleTimeMatch[1];
+        const ampmValue = singleTimeMatch[2].toUpperCase() as 'AM' | 'PM';
+        const time24 = convertTo24Hour(time12, ampmValue);
+        setStartTime(time24);
+        setStartAmpm(ampmValue);
+        setEndTime(time24);
+        setEndAmpm(ampmValue);
       }
     }
     setLocation(ev.location);
@@ -261,12 +309,16 @@ export function SchoolCalendar() {
     if (Object.keys(validation).length > 0) return;
     setFormSubmitting(true);
     try {
+      // Convert 24-hour format to 12-hour format for saving
+      const startTime12 = convertTo12Hour(startTime);
+      const endTime12 = convertTo12Hour(endTime);
+      
       if (editingEvent) {
         await updateEvent({
           ...editingEvent,
           title,
           date,
-          time: `${startTime} ${startAmpm} - ${endTime} ${endAmpm} PHT`,
+          time: `${startTime12.time} ${startTime12.ampm} - ${endTime12.time} ${endTime12.ampm} PHT`,
           type,
           description,
           location,
@@ -281,7 +333,7 @@ export function SchoolCalendar() {
         await addEvent({
           title,
           date,
-          time: `${startTime} ${startAmpm} - ${endTime} ${endAmpm} PHT`,
+          time: `${startTime12.time} ${startTime12.ampm} - ${endTime12.time} ${endTime12.ampm} PHT`,
           type,
           description,
           location,
@@ -564,12 +616,24 @@ export function SchoolCalendar() {
                           type="time"
                           value={startTime}
                           onChange={(e) => {
-                            setStartTime(e.target.value);
+                            const time24 = e.target.value;
+                            setStartTime(time24);
+                            // Convert 24-hour to 12-hour and update AM/PM
+                            const converted = convertTo12Hour(time24);
+                            setStartAmpm(converted.ampm);
                             if (errors.startTime) setErrors(prev => ({ ...prev, startTime: undefined }));
                           }}
                           className="flex-1 rounded-md border border-input bg-background px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm"
                         />
-                        <Select value={startAmpm} onValueChange={(v) => { setStartAmpm(v as 'AM' | 'PM'); if (errors.startTime) setErrors(prev => ({ ...prev, startTime: undefined })); }}>
+                        <Select value={startAmpm} onValueChange={(v) => { 
+                          const newAmpm = v as 'AM' | 'PM';
+                          setStartAmpm(newAmpm);
+                          // Update time to reflect AM/PM change
+                          const converted = convertTo12Hour(startTime);
+                          const newTime24 = convertTo24Hour(converted.time, newAmpm);
+                          setStartTime(newTime24);
+                          if (errors.startTime) setErrors(prev => ({ ...prev, startTime: undefined })); 
+                        }}>
                           <SelectTrigger className="w-20">
                             <SelectValue />
                           </SelectTrigger>
@@ -587,12 +651,24 @@ export function SchoolCalendar() {
                           type="time"
                           value={endTime}
                           onChange={(e) => {
-                            setEndTime(e.target.value);
+                            const time24 = e.target.value;
+                            setEndTime(time24);
+                            // Convert 24-hour to 12-hour and update AM/PM
+                            const converted = convertTo12Hour(time24);
+                            setEndAmpm(converted.ampm);
                             if (errors.endTime) setErrors(prev => ({ ...prev, endTime: undefined }));
                           }}
                           className="flex-1 rounded-md border border-input bg-background px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] md:text-sm"
                         />
-                        <Select value={endAmpm} onValueChange={(v) => { setEndAmpm(v as 'AM' | 'PM'); if (errors.endTime) setErrors(prev => ({ ...prev, endTime: undefined })); }}>
+                        <Select value={endAmpm} onValueChange={(v) => { 
+                          const newAmpm = v as 'AM' | 'PM';
+                          setEndAmpm(newAmpm);
+                          // Update time to reflect AM/PM change
+                          const converted = convertTo12Hour(endTime);
+                          const newTime24 = convertTo24Hour(converted.time, newAmpm);
+                          setEndTime(newTime24);
+                          if (errors.endTime) setErrors(prev => ({ ...prev, endTime: undefined })); 
+                        }}>
                           <SelectTrigger className="w-20">
                             <SelectValue />
                           </SelectTrigger>
