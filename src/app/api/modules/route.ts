@@ -46,10 +46,22 @@ export async function GET(req: Request) {
       .sort({ title: 1 })
       .toArray();
 
+    // Log for debugging
+    console.log(`📊 Fetched ${modules.length} modules from database`, {
+      userRole,
+      assignedBarangayId: assignedBarangayId || 'none',
+      barangayIdFilter: barangayId || 'none',
+      filterApplied: JSON.stringify(filter),
+      modulesWithBarangayId: modules.filter((m: any) => m.barangayId).length,
+      globalModules: modules.filter((m: any) => !m.barangayId).length
+    });
+
     // Ensure all modules have consistent structure (createdAt is optional for backward compatibility)
     const normalizedModules = modules.map((module: any) => ({
       ...module,
       _id: module._id?.toString() || module._id,
+      // Ensure barangayId is included in response
+      barangayId: module.barangayId || undefined,
       // createdAt is optional - existing modules without it will still work
       createdAt: module.createdAt || undefined,
     }));
@@ -131,7 +143,34 @@ export async function POST(req: Request) {
       insertData.barangayId = barangayId;
     }
 
+    // Log the data being inserted for debugging
+    console.log(`📝 Creating module in database:`, {
+      title: insertData.title,
+      barangayId: insertData.barangayId || 'null (global)',
+      userRole,
+      assignedBarangayId: assignedBarangayId || 'none',
+      levels: insertData.levels
+    });
+
     const result = await db.collection("modules").insertOne(insertData);
+
+    // Verify the module was actually inserted by fetching it back
+    const insertedModule = await db.collection("modules").findOne({
+      _id: result.insertedId
+    });
+
+    if (!insertedModule) {
+      console.error("❌ Module insertion failed - module not found after insert");
+      return NextResponse.json(
+        { success: false, error: "Failed to verify module creation" },
+        { status: 500 }
+      );
+    }
+
+    console.log(`✅ Module successfully saved to database with _id: ${result.insertedId.toString()}`, {
+      savedBarangayId: insertedModule.barangayId || 'null (global)',
+      savedTitle: insertedModule.title
+    });
 
     return NextResponse.json({
       success: true,
@@ -140,7 +179,7 @@ export async function POST(req: Request) {
         title: insertData.title,
         levels: insertData.levels,
         predefinedActivities: insertData.predefinedActivities,
-        barangayId: insertData.barangayId,
+        barangayId: insertedModule.barangayId || undefined, // Use the actual saved value
         createdAt: insertData.createdAt
       }
     });
@@ -174,34 +213,56 @@ export async function PATCH(req: Request) {
 
     // First, get the existing module to check its barangayId
     const isObjectId = ObjectId.isValid(_id);
-    const existingModule = await db.collection("modules").findOne({
+    let existingModule = await db.collection("modules").findOne({
       _id: isObjectId ? new ObjectId(_id) : _id
     });
 
-    if (!existingModule) {
+    // If module doesn't exist, it might be a hard-coded module from JSON
+    // In this case, we'll create it in the database with the provided data
+    const isHardCodedModule = !existingModule && !isObjectId && typeof _id === 'string' && _id.startsWith('module-');
+    
+    if (!existingModule && !isHardCodedModule) {
       return NextResponse.json(
         { success: false, error: "Module not found" },
         { status: 404 }
       );
     }
 
-    // Validate admin can only edit modules for their assigned barangay
-    if (userRole === 'teacher') {
-      if (!assignedBarangayId) {
-        return NextResponse.json(
-          { success: false, error: "Teacher must have an assigned barangay to edit modules" },
-          { status: 403 }
-        );
-      }
+    // For hard-coded modules, we'll create them in the database
+    // For existing modules, validate permissions
+    if (existingModule) {
+      // Validate teacher can edit modules for their assigned barangay OR global modules (new modules)
+      if (userRole === 'teacher') {
+        if (!assignedBarangayId) {
+          return NextResponse.json(
+            { success: false, error: "Teacher must have an assigned barangay to edit modules" },
+            { status: 403 }
+          );
+        }
 
-      const moduleBarangayId = existingModule.barangayId;
-      // Admin can only edit modules that belong to their barangay
-      // Global/legacy modules without barangayId can only be edited by master_admin
-      if (!moduleBarangayId || moduleBarangayId !== assignedBarangayId) {
-        return NextResponse.json(
-          { success: false, error: "You can only edit modules for your assigned barangay" },
-          { status: 403 }
-        );
+        const moduleBarangayId = existingModule.barangayId;
+        // Teachers can edit:
+        // 1. Modules that belong to their barangay
+        // 2. Global modules (without barangayId) - these are "new modules" visible to teachers
+        if (moduleBarangayId && moduleBarangayId !== assignedBarangayId) {
+          return NextResponse.json(
+            { success: false, error: "You can only edit modules for your assigned barangay or global modules" },
+            { status: 403 }
+          );
+        }
+        // If moduleBarangayId is undefined/null (global module) OR matches assignedBarangayId, allow editing
+      }
+    } else if (isHardCodedModule) {
+      // For hard-coded modules being created, validate teacher permissions
+      if (userRole === 'teacher') {
+        if (!assignedBarangayId) {
+          return NextResponse.json(
+            { success: false, error: "Teacher must have an assigned barangay to create/edit modules" },
+            { status: 403 }
+          );
+        }
+        // Teachers can create modules for their barangay or as global modules
+        // The barangayId will be set in the updatePayload below
       }
     }
 
@@ -247,7 +308,7 @@ export async function PATCH(req: Request) {
     if (barangayId !== undefined && userRole === 'admin') {
       updatePayload.barangayId = barangayId || null; // Allow setting to null for global modules
     } else if (userRole === 'teacher' && assignedBarangayId) {
-      // Ensure admin's modules stay assigned to their barangay
+      // Ensure teacher's modules stay assigned to their barangay
       updatePayload.barangayId = assignedBarangayId;
     }
 
@@ -258,32 +319,118 @@ export async function PATCH(req: Request) {
       );
     }
 
-    // Preserve createdAt if it exists and is not being updated
-    if (!updatePayload.createdAt && existingModule?.createdAt) {
-      // Don't include createdAt in updatePayload, it will be preserved automatically
-      // MongoDB $set only updates specified fields, so createdAt will remain
+    // For hard-coded modules, we need to create them with a new MongoDB ObjectId
+    // but preserve the original title and structure
+    if (isHardCodedModule) {
+      // Validate required fields for creation
+      if (!title || !title.trim()) {
+        return NextResponse.json(
+          { success: false, error: "Module title is required" },
+          { status: 400 }
+        );
+      }
+
+      if (!levels || !Array.isArray(levels) || levels.length === 0) {
+        return NextResponse.json(
+          { success: false, error: "At least one program level is required" },
+          { status: 400 }
+        );
+      }
+
+      // Create a new module in the database with the provided data
+      const insertData: any = {
+        title: title.trim(),
+        levels: levels,
+        predefinedActivities: predefinedActivities || [],
+        createdAt: new Date().toISOString(),
+      };
+
+      // Set barangayId based on user role and provided data
+      if (barangayId !== undefined) {
+        insertData.barangayId = barangayId || null;
+      } else if (userRole === 'teacher' && assignedBarangayId) {
+        insertData.barangayId = assignedBarangayId;
+      } else if (userRole === 'admin') {
+        // Admin can create global modules (barangayId = null)
+        insertData.barangayId = null;
+      }
+
+      console.log(`📝 Creating hard-coded module in database during update:`, {
+        title: insertData.title,
+        barangayId: insertData.barangayId || 'null (global)'
+      });
+
+      const insertResult = await db.collection("modules").insertOne(insertData);
+      
+      // Verify the module was actually inserted
+      const insertedModule = await db.collection("modules").findOne({
+        _id: insertResult.insertedId
+      });
+
+      if (!insertedModule) {
+        console.error("❌ Hard-coded module creation failed during update - module not found after insert");
+        return NextResponse.json(
+          { success: false, error: "Failed to verify module creation" },
+          { status: 500 }
+        );
+      }
+
+      console.log(`✅ Hard-coded module successfully created in database with _id: ${insertResult.insertedId.toString()}`);
+      
+      return NextResponse.json({
+        success: true,
+        data: {
+          _id: insertResult.insertedId.toString(),
+          title: insertData.title,
+          levels: insertData.levels,
+          predefinedActivities: insertData.predefinedActivities,
+          barangayId: insertData.barangayId,
+          createdAt: insertData.createdAt,
+        }
+      });
     }
 
-    const result = await db.collection("modules").findOneAndUpdate(
+    // Log update attempt
+    console.log(`📝 Updating module in database:`, {
+      _id,
+      title: title || existingModule?.title,
+      barangayId: updatePayload.barangayId || existingModule?.barangayId || 'null (global)',
+      updateFields: Object.keys(updatePayload)
+    });
+
+    // Update the existing module
+    const updateResult = await db.collection("modules").updateOne(
       filter,
-      { $set: updatePayload },
-      { returnDocument: "after", upsert: true }
+      { $set: updatePayload }
     );
 
-    // Handle potential null result
-    if (!result) {
+    // Check if the update matched any document
+    if (updateResult.matchedCount === 0) {
+      console.error(`❌ Module update failed - no document matched the filter`);
       return NextResponse.json(
-        { success: false, error: "Failed to update module - no result returned" },
+        { success: false, error: "Module not found or could not be updated" },
+        { status: 404 }
+      );
+    }
+
+    // Check if the update actually modified anything
+    if (updateResult.modifiedCount === 0 && updateResult.matchedCount > 0) {
+      console.warn(`⚠️ Module update matched but no changes were made (values may be the same)`);
+      // This is okay - the values might be the same, so we'll just return the existing module
+    }
+
+    // Fetch the updated document to return it
+    const updatedDocument = await db.collection("modules").findOne(filter);
+
+    if (!updatedDocument) {
+      console.error(`❌ Module update verification failed - module not found after update`);
+      return NextResponse.json(
+        { success: false, error: "Failed to verify module update" },
         { status: 500 }
       );
     }
 
-    const updatedDocument = result.value ?? {
-      _id: result.lastErrorObject?.upserted || filter._id,
-      ...updatePayload,
-      // Preserve createdAt from existing module if not in updatePayload
-      createdAt: updatePayload.createdAt || existingModule?.createdAt,
-    };
+    console.log(`✅ Module successfully updated in database`);
 
     return NextResponse.json({
       success: true,
@@ -335,7 +482,7 @@ export async function DELETE(req: Request) {
       );
     }
 
-    // Validate admin can only delete modules for their assigned barangay
+    // Validate teacher can delete modules for their assigned barangay OR global modules (new modules)
     if (userRole === 'teacher') {
       if (!assignedBarangayId) {
         return NextResponse.json(
@@ -345,26 +492,49 @@ export async function DELETE(req: Request) {
       }
 
       const moduleBarangayId = existingModule.barangayId;
-      // Admin can only delete modules that belong to their barangay
-      // Global/legacy modules without barangayId can only be deleted by master_admin
-      if (!moduleBarangayId || moduleBarangayId !== assignedBarangayId) {
+      // Teachers can delete:
+      // 1. Modules that belong to their barangay
+      // 2. Global modules (without barangayId) - these are "new modules" visible to teachers
+      if (moduleBarangayId && moduleBarangayId !== assignedBarangayId) {
         return NextResponse.json(
-          { success: false, error: "You can only delete modules for your assigned barangay" },
+          { success: false, error: "You can only delete modules for your assigned barangay or global modules" },
           { status: 403 }
         );
       }
+      // If moduleBarangayId is undefined/null (global module) OR matches assignedBarangayId, allow deletion
     }
 
     const filter = { _id: isObjectId ? new ObjectId(_id) : _id };
 
+    // Log deletion attempt
+    console.log(`🗑️ Deleting module from database:`, {
+      _id,
+      title: existingModule.title,
+      barangayId: existingModule.barangayId || 'null (global)'
+    });
+
     const result = await db.collection("modules").deleteOne(filter);
 
     if (result.deletedCount === 0) {
+      console.error(`❌ Module deletion failed - module not found or already deleted`);
       return NextResponse.json(
         { success: false, error: "Module not found" },
         { status: 404 }
       );
     }
+
+    // Verify the module was actually deleted
+    const deletedModule = await db.collection("modules").findOne(filter);
+
+    if (deletedModule) {
+      console.error(`❌ Module deletion verification failed - module still exists`);
+      return NextResponse.json(
+        { success: false, error: "Module deletion verification failed" },
+        { status: 500 }
+      );
+    }
+
+    console.log(`✅ Module successfully deleted from database`);
 
     return NextResponse.json({ success: true });
   } catch (error) {

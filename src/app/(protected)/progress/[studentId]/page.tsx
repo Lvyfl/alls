@@ -89,9 +89,15 @@ const filterModulesForProgram = (modules: Module[], program?: string | null, bar
 
   // Filter by barangayId: show modules for this barangay OR modules without barangayId (legacy/global)
   if (barangayId) {
-    filtered = filtered.filter((module) =>
-      !module.barangayId || module.barangayId === barangayId
-    );
+    filtered = filtered.filter((module) => {
+      // Show module if:
+      // 1. Module has no barangayId (global module)
+      // 2. Module's barangayId matches the filter barangayId
+      // Use string comparison to handle potential type mismatches
+      const moduleBarangayId = module.barangayId ? String(module.barangayId) : null;
+      const filterBarangayId = String(barangayId);
+      return !moduleBarangayId || moduleBarangayId === filterBarangayId;
+    });
   }
 
   // Filter by program
@@ -415,8 +421,12 @@ function StudentActivitySummaryPageContent() {
       return;
     }
     // Filter by both program and barangay
-    const barangayId = student?.barangayId ||
-      (user?.role === 'teacher' ? user.assignedBarangayId : undefined);
+    // For teachers: always use their assigned barangayId to show modules they created
+    // This ensures modules created by teachers appear even when viewing students from other barangays
+    const barangayId = user?.role === 'teacher' 
+      ? user.assignedBarangayId 
+      : (student?.barangayId || undefined);
+    
     setAvailableModules(filterModulesForProgram(allModules, student?.program, barangayId));
   }, [allModules, student?.program, student?.barangayId, user?.role, user?.assignedBarangayId]);
 
@@ -460,22 +470,37 @@ function StudentActivitySummaryPageContent() {
   // Module dialog helpers
   const handleOpenModuleDialog = useCallback(
     (mode: "create" | "edit") => {
-      if (mode === "edit" && !selectedModuleData) {
-        return;
+      if (mode === "edit") {
+        // Try to get selectedModuleData if it's not available
+        const moduleToEdit = selectedModuleData || 
+          (selectedModule ? availableModules.find((m) => m._id === selectedModule) : null);
+        
+        if (!moduleToEdit) {
+          console.warn("No module selected for editing");
+          return;
+        }
+        
+        setModuleDialogMode(mode);
+        setModuleBeingEdited(moduleToEdit);
+        setIsModuleDialogOpen(true);
+      } else {
+        setModuleDialogMode(mode);
+        setModuleBeingEdited(null);
+        setIsModuleDialogOpen(true);
       }
-      setModuleDialogMode(mode);
-      setModuleBeingEdited(mode === "edit" ? selectedModuleData : null);
-      setIsModuleDialogOpen(true);
     },
-    [selectedModuleData]
+    [selectedModuleData, selectedModule, availableModules]
   );
 
   const handleCreateModule = useCallback(
     async (moduleData: ModuleFormPayload) => {
       try {
-        // Determine barangayId: use student's barangay or admin's assigned barangay
-        const barangayId = student?.barangayId ||
-          (user?.role === 'teacher' ? user.assignedBarangayId : undefined);
+        // Determine barangayId: 
+        // For teachers: always use their assigned barangayId (not student's barangay)
+        // This ensures modules are associated with the teacher's barangay
+        const barangayId = user?.role === 'teacher' 
+          ? user.assignedBarangayId 
+          : (student?.barangayId || undefined);
 
         const modulePayload = {
           ...moduleData,
@@ -484,7 +509,28 @@ function StudentActivitySummaryPageContent() {
 
         const createdModule = await createModule(modulePayload);
         const normalized = normalizeModuleRecord(createdModule);
+        
+        // Add the new module to allModules
         setAllModules((prev) => dedupeModulesById([...prev, normalized]));
+        
+        // Refresh modules from API to ensure we have the latest data
+        try {
+          const barangayIdForFilter = student?.barangayId ||
+            (user?.role === 'teacher' ? user.assignedBarangayId : undefined);
+          const apiModules = await fetchModules(barangayIdForFilter);
+          if (apiModules && apiModules.length > 0) {
+            setAllModules((prev) =>
+              dedupeModulesById([
+                ...prev,
+                ...apiModules.map(normalizeModuleRecord),
+              ])
+            );
+          }
+        } catch (refreshError) {
+          console.warn("Error refreshing modules after creation:", refreshError);
+          // Continue anyway - the module was already added above
+        }
+        
         setSelectedModule(normalized._id);
         displaySuccessMessage(`Module "${moduleData.title}" added successfully.`);
       } catch (error) {
@@ -509,20 +555,30 @@ function StudentActivitySummaryPageContent() {
           barangayId: barangayId || undefined, // Only include if it exists
         };
 
+        // Backend will handle hard-coded modules by creating them in the database
+        // if they don't exist, so we can just call updateModule
         const updatedModule = await updateModule(moduleId, modulePayload);
         const normalized = normalizeModuleRecord(updatedModule);
+        
+        // Update the module in the list - use the new _id if it was a hard-coded module
         setAllModules((prev) =>
           dedupeModulesById(
             prev.map((module) => (module._id === moduleId ? normalized : module))
           )
         );
+        
+        // Update selected module if it was the one being edited (use new _id for hard-coded modules)
+        if (selectedModule === moduleId) {
+          setSelectedModule(normalized._id);
+        }
+        
         displaySuccessMessage(`Module "${moduleData.title}" updated successfully.`);
       } catch (error) {
         console.error("Error updating module:", error);
         throw error instanceof Error ? error : new Error("Failed to update module");
       }
     },
-    [displaySuccessMessage, student?.barangayId, user?.role, user?.assignedBarangayId]
+    [displaySuccessMessage, student?.barangayId, user?.role, user?.assignedBarangayId, selectedModule]
   );
 
   const handleConfirmModuleDeletion = useCallback(async () => {
@@ -867,7 +923,7 @@ function StudentActivitySummaryPageContent() {
                 onClick={() => handleOpenModuleDialog("edit")}
                 variant="outline"
                 size="sm"
-                disabled={!selectedModuleData}
+                disabled={!selectedModule && availableModules.length === 0}
                 className="bg-amber-500 dark:bg-amber-600 text-white hover:bg-amber-400 dark:hover:bg-amber-500 border-amber-500 dark:border-amber-600 hover:border-amber-400 dark:hover:border-amber-500 cursor-pointer transition-all duration-200 hover:shadow-md flex items-center gap-2 disabled:bg-gray-300 disabled:text-gray-600 disabled:border-gray-300 disabled:cursor-not-allowed"
               >
                 <Pencil className="h-4 w-4" />

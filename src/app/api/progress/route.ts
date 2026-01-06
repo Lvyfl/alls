@@ -42,10 +42,41 @@ export async function POST(req: Request) {
       );
     }
 
+    // Log the data being inserted for debugging
+    console.log(`📝 Creating progress in database:`, {
+      studentId: progressData.studentId,
+      moduleId: progressData.moduleId,
+      activitiesCount: progressData.activities?.length || 0
+    });
+
     // Insert the new progress into the database
     const result = await db.collection("progress").insertOne(progressData);
 
-    return NextResponse.json({ success: true, data: result });
+    // Verify the progress was actually inserted by fetching it back
+    const insertedProgress = await db.collection("progress").findOne({
+      _id: result.insertedId
+    });
+
+    if (!insertedProgress) {
+      console.error("❌ Progress insertion failed - progress not found after insert");
+      return NextResponse.json(
+        { success: false, error: "Failed to verify progress creation" },
+        { status: 500 }
+      );
+    }
+
+    console.log(`✅ Progress successfully saved to database with _id: ${result.insertedId.toString()}`);
+
+    return NextResponse.json({ 
+      success: true, 
+      data: {
+        insertedId: result.insertedId,
+        progress: {
+          _id: result.insertedId.toString(),
+          ...insertedProgress
+        }
+      }
+    });
   } catch (error) {
     console.error("Error inserting progress:", error);
     return NextResponse.json(
@@ -138,6 +169,13 @@ export async function DELETE(req: Request) {
     const db = client.db("main");
     const { studentId, moduleId, activityIndex } = await req.json();
 
+    // Log deletion attempt
+    console.log(`🗑️ Deleting activity from progress:`, {
+      studentId,
+      moduleId,
+      activityIndex
+    });
+
     // Delete the specific activity from the progress record
     const unsetResult = await db
       .collection("progress")
@@ -158,6 +196,7 @@ export async function DELETE(req: Request) {
     };
 
     if (result.modifiedCount === 0) {
+      console.error(`❌ Activity deletion failed - no progress record found or no changes made`);
       return NextResponse.json(
         {
           success: false,
@@ -166,6 +205,22 @@ export async function DELETE(req: Request) {
         { status: 404 }
       );
     }
+
+    // Verify the activity was actually deleted
+    const progressRecord = await db.collection("progress").findOne({
+      studentId,
+      moduleId
+    });
+
+    if (progressRecord && progressRecord.activities && progressRecord.activities[activityIndex]) {
+      console.error(`❌ Activity deletion verification failed - activity still exists`);
+      return NextResponse.json(
+        { success: false, error: "Activity deletion verification failed" },
+        { status: 500 }
+      );
+    }
+
+    console.log(`✅ Activity successfully deleted from progress`);
 
     return NextResponse.json({ success: true });
   } catch (error) {

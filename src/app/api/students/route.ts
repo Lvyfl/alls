@@ -51,10 +51,41 @@ export async function POST(req: Request) {
       }
     }
 
+    // Log the data being inserted for debugging
+    console.log(`📝 Creating student in database:`, {
+      name: studentData.name,
+      lrn: studentData.lrn,
+      barangayId: studentData.barangayId || 'none'
+    });
+
     // Insert the new student into the database
     const result = await db.collection("students").insertOne(studentData);
 
-    return NextResponse.json({ success: true, data: result });
+    // Verify the student was actually inserted by fetching it back
+    const insertedStudent = await db.collection("students").findOne({
+      _id: result.insertedId
+    });
+
+    if (!insertedStudent) {
+      console.error("❌ Student insertion failed - student not found after insert");
+      return NextResponse.json(
+        { success: false, error: "Failed to verify student creation" },
+        { status: 500 }
+      );
+    }
+
+    console.log(`✅ Student successfully saved to database with _id: ${result.insertedId.toString()}`);
+
+    return NextResponse.json({ 
+      success: true, 
+      data: {
+        insertedId: result.insertedId,
+        student: {
+          _id: result.insertedId.toString(),
+          ...insertedStudent
+        }
+      }
+    });
   } catch (error: any) {
     console.error("Error inserting student:", error);
     // Handle duplicate key error from MongoDB
@@ -147,6 +178,13 @@ export async function DELETE(req: Request) {
       console.log(`Deleted ${progressDeleteResult.deletedCount} progress records for student with LRN: ${studentLrn}`);
     }
 
+    // Log deletion attempt
+    console.log(`🗑️ Deleting student from database:`, {
+      _id,
+      lrn: studentLrn,
+      name: student.name
+    });
+
     // Delete the student from the database
     const result = await db.collection("students").deleteOne({
       _id: ObjectId.createFromHexString(_id),
@@ -154,11 +192,27 @@ export async function DELETE(req: Request) {
 
     // Check if the deletion was successful
     if (result.deletedCount === 0) {
+      console.error(`❌ Student deletion failed - student not found or already deleted`);
       return NextResponse.json(
         { success: false, error: "Failed to delete student" },
         { status: 404 }
       );
     }
+
+    // Verify the student was actually deleted
+    const deletedStudent = await db.collection("students").findOne({
+      _id: ObjectId.createFromHexString(_id),
+    });
+
+    if (deletedStudent) {
+      console.error(`❌ Student deletion verification failed - student still exists`);
+      return NextResponse.json(
+        { success: false, error: "Student deletion verification failed" },
+        { status: 500 }
+      );
+    }
+
+    console.log(`✅ Student successfully deleted from database`);
 
     return NextResponse.json({ success: true });
   } catch (error) {
