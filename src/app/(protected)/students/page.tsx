@@ -17,12 +17,31 @@ import {
 } from '@/components/ui/dialog';
 import { BarangayTabs } from '@/components/students/barangay-tabs';
 import { BarangayTabsSkeleton } from '@/components/students/barangay-tabs-skeleton';
-
-import { StudentTable } from '@/components/students/student-table';
-import { StudentTableSkeleton } from '@/components/students/student-table-skeleton';
-import { StudentDialog } from '@/components/students/student-dialog';
-import { StudentDetailsDialog } from '@/components/students/student-details-dialog';
 import { Plus, Download } from 'lucide-react';
+
+// Lazy load heavy components for better initial load performance
+import dynamic from 'next/dynamic';
+const StudentTable = dynamic(
+  () => import('@/components/students/student-table').then(mod => ({ default: mod.StudentTable })),
+  {
+    loading: () => <StudentTableSkeleton />,
+    ssr: false
+  }
+);
+const StudentTableSkeleton = dynamic(
+  () => import('@/components/students/student-table-skeleton').then(mod => ({ default: mod.StudentTableSkeleton })),
+  { ssr: false }
+);
+const StudentDialog = dynamic(
+  () => import('@/components/students/student-dialog').then(mod => ({ default: mod.StudentDialog })),
+  { ssr: false }
+);
+const StudentDetailsDialog = dynamic(
+  () => import('@/components/students/student-details-dialog').then(mod => ({ default: mod.StudentDetailsDialog })),
+  { ssr: false }
+);
+
+// Regular import for utility function (not a component)
 import { exportStudentMasterlist } from '@/utils/excel-export';
 
 export default function StudentsPage() {

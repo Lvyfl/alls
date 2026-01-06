@@ -41,20 +41,31 @@ export async function GET(req: Request) {
         : {};
     }
 
+    // Use projection to only fetch needed fields for better performance
     const modules = await db.collection("modules")
-      .find(filter)
+      .find(filter, {
+        projection: {
+          _id: 1,
+          title: 1,
+          levels: 1,
+          predefinedActivities: 1,
+          barangayId: 1,
+          createdAt: 1,
+        }
+      })
       .sort({ title: 1 })
       .toArray();
 
-    // Log for debugging
-    console.log(`📊 Fetched ${modules.length} modules from database`, {
-      userRole,
-      assignedBarangayId: assignedBarangayId || 'none',
-      barangayIdFilter: barangayId || 'none',
-      filterApplied: JSON.stringify(filter),
-      modulesWithBarangayId: modules.filter((m: any) => m.barangayId).length,
-      globalModules: modules.filter((m: any) => !m.barangayId).length
-    });
+    // Log for debugging (only in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📊 Fetched ${modules.length} modules from database`, {
+        userRole,
+        assignedBarangayId: assignedBarangayId || 'none',
+        barangayIdFilter: barangayId || 'none',
+        modulesWithBarangayId: modules.filter((m: any) => m.barangayId).length,
+        globalModules: modules.filter((m: any) => !m.barangayId).length
+      });
+    }
 
     // Ensure all modules have consistent structure (createdAt is optional for backward compatibility)
     const normalizedModules = modules.map((module: any) => ({
@@ -143,14 +154,16 @@ export async function POST(req: Request) {
       insertData.barangayId = barangayId;
     }
 
-    // Log the data being inserted for debugging
-    console.log(`📝 Creating module in database:`, {
-      title: insertData.title,
-      barangayId: insertData.barangayId || 'null (global)',
-      userRole,
-      assignedBarangayId: assignedBarangayId || 'none',
-      levels: insertData.levels
-    });
+    // Log the data being inserted for debugging (only in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📝 Creating module in database:`, {
+        title: insertData.title,
+        barangayId: insertData.barangayId || 'null (global)',
+        userRole,
+        assignedBarangayId: assignedBarangayId || 'none',
+        levels: insertData.levels
+      });
+    }
 
     const result = await db.collection("modules").insertOne(insertData);
 
@@ -167,10 +180,12 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log(`✅ Module successfully saved to database with _id: ${result.insertedId.toString()}`, {
-      savedBarangayId: insertedModule.barangayId || 'null (global)',
-      savedTitle: insertedModule.title
-    });
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`✅ Module successfully saved to database with _id: ${result.insertedId.toString()}`, {
+        savedBarangayId: insertedModule.barangayId || 'null (global)',
+        savedTitle: insertedModule.title
+      });
+    }
 
     return NextResponse.json({
       success: true,
@@ -375,7 +390,9 @@ export async function PATCH(req: Request) {
         );
       }
 
-      console.log(`✅ Hard-coded module successfully created in database with _id: ${insertResult.insertedId.toString()}`);
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`✅ Hard-coded module successfully created in database with _id: ${insertResult.insertedId.toString()}`);
+      }
       
       return NextResponse.json({
         success: true,
@@ -430,7 +447,9 @@ export async function PATCH(req: Request) {
       );
     }
 
-    console.log(`✅ Module successfully updated in database`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`✅ Module successfully updated in database`);
+    }
 
     return NextResponse.json({
       success: true,

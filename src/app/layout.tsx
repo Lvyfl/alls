@@ -5,14 +5,19 @@ import { Providers } from "@/components/providers/Providers";
 import { ThemeProvider } from "@/components/accessibility/theme-provider";
 import { ToastProvider } from "@/components/ui/toast-provider";
 
+// Optimize font loading with display swap for better performance
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
+  display: "swap", // Show fallback font immediately, swap when loaded
+  preload: true,
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {

@@ -5,8 +5,18 @@ export async function GET() {
   try {
     const client = await clientPromise;
     const db = client.db("main");
+    
+    // Use projection to only fetch needed fields
     const barangays = await db.collection("barangays")
-      .find({})
+      .find({}, {
+        projection: {
+          _id: 1,
+          name: 1,
+          address: 1,
+          latitude: 1,
+          longitude: 1,
+        }
+      })
       .sort({ name: 1 }) // Sort by name for consistent ordering
       .toArray();
     

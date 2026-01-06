@@ -83,7 +83,9 @@ export const fetchModules = async (barangayId?: string): Promise<Module[]> => {
       modules = response as Module[];
     }
 
-    console.log(`📊 Loaded ${modules.length} modules${barangayId ? ` for barangay ${barangayId}` : ''} from storage`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📊 Loaded ${modules.length} modules${barangayId ? ` for barangay ${barangayId}` : ''} from storage`);
+    }
 
     return modules;
   } catch (error) {

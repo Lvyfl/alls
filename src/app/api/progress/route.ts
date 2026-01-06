@@ -7,11 +7,28 @@ export async function GET(req: Request) {
     const db = client.db("main");
     const url = new URL(req.url);
     const studentId = url.searchParams.get("studentId");
+    
+    // Use projection to only fetch needed fields for better performance
     const progress = await db
       .collection("progress")
-      .find({ studentId: studentId })
+      .find(
+        { studentId: studentId },
+        {
+          projection: {
+            _id: 1,
+            studentId: 1,
+            moduleId: 1,
+            activities: 1,
+          }
+        }
+      )
       .toArray();
-    return NextResponse.json(progress);
+    
+    return NextResponse.json(progress, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
+      },
+    });
   } catch (e) {
     console.error(e);
     return NextResponse.json(
@@ -42,12 +59,14 @@ export async function POST(req: Request) {
       );
     }
 
-    // Log the data being inserted for debugging
-    console.log(`📝 Creating progress in database:`, {
-      studentId: progressData.studentId,
-      moduleId: progressData.moduleId,
-      activitiesCount: progressData.activities?.length || 0
-    });
+    // Log the data being inserted for debugging (only in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📝 Creating progress in database:`, {
+        studentId: progressData.studentId,
+        moduleId: progressData.moduleId,
+        activitiesCount: progressData.activities?.length || 0
+      });
+    }
 
     // Insert the new progress into the database
     const result = await db.collection("progress").insertOne(progressData);
@@ -65,15 +84,17 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log(`✅ Progress successfully saved to database with _id: ${result.insertedId.toString()}`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`✅ Progress successfully saved to database with _id: ${result.insertedId.toString()}`);
+    }
 
     return NextResponse.json({ 
       success: true, 
       data: {
         insertedId: result.insertedId,
         progress: {
-          _id: result.insertedId.toString(),
-          ...insertedProgress
+          ...insertedProgress,
+          _id: result.insertedId.toString()
         }
       }
     });

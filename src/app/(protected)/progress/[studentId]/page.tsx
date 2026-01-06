@@ -15,6 +15,7 @@ import Image from "next/image";
 import { shallow } from "zustand/shallow";
 
 // Import static data directly as fallback
+// These are small JSON files, so importing them is fine for performance
 import studentsData from "@/data/students.json";
 import progressData from "@/data/progress.json";
 import modulesData from "@/data/modules.json";
@@ -130,12 +131,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ActivityTable } from "@/components/progress/activity-table";
-import { ActivityTableSkeleton } from "@/components/progress/activity-table-skeleton";
-import { AddCustomModuleDialog } from "@/components/progress/add-custom-module-dialog";
 import { ErrorBoundary } from "@/components/error-boundary";
 // @ts-ignore - available at runtime
 import { ArrowLeft, ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
+
+// Lazy load heavy components for better initial load performance
+import dynamic from "next/dynamic";
+const ActivityTable = dynamic(
+  () => import("@/components/progress/activity-table").then(mod => ({ default: mod.ActivityTable })),
+  {
+    loading: () => <div className="p-4">Loading activities...</div>,
+    ssr: false
+  }
+);
+const ActivityTableSkeleton = dynamic(
+  () => import("@/components/progress/activity-table-skeleton").then(mod => ({ default: mod.ActivityTableSkeleton })),
+  { ssr: false }
+);
+const AddCustomModuleDialog = dynamic(
+  () => import("@/components/progress/add-custom-module-dialog").then(mod => ({ default: mod.AddCustomModuleDialog })),
+  { ssr: false }
+);
 import {
   deleteProgress,
   fetchModules,

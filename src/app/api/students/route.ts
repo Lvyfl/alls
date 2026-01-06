@@ -6,16 +6,34 @@ export async function GET() {
   try {
     const client = await clientPromise;
     const db = client.db("main");
-    // Use projection to only fetch needed fields and limit results for better performance
+    
+    // Use projection to only fetch needed fields for better performance
+    // Only fetch essential fields to reduce payload size
     const students = await db.collection("students")
-      .find({})
+      .find({}, {
+        projection: {
+          _id: 1,
+          lrn: 1,
+          name: 1,
+          status: 1,
+          gender: 1,
+          barangayId: 1,
+          program: 1,
+          address: 1,
+          enrollmentDate: 1,
+          modality: 1,
+          // Exclude large fields that aren't always needed
+          // assessment: 0,
+          // pisScore: 0,
+        }
+      })
       .sort({ name: 1 }) // Sort by name for consistent ordering
       .toArray();
     
-    // Add cache headers for better performance
+    // Add cache headers for better performance (students don't change frequently)
     return NextResponse.json(students, {
       headers: {
-        'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=60',
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
       },
     });
   } catch (e) {
@@ -51,12 +69,14 @@ export async function POST(req: Request) {
       }
     }
 
-    // Log the data being inserted for debugging
-    console.log(`📝 Creating student in database:`, {
-      name: studentData.name,
-      lrn: studentData.lrn,
-      barangayId: studentData.barangayId || 'none'
-    });
+    // Log the data being inserted for debugging (only in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📝 Creating student in database:`, {
+        name: studentData.name,
+        lrn: studentData.lrn,
+        barangayId: studentData.barangayId || 'none'
+      });
+    }
 
     // Insert the new student into the database
     const result = await db.collection("students").insertOne(studentData);
@@ -74,15 +94,17 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log(`✅ Student successfully saved to database with _id: ${result.insertedId.toString()}`);
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`✅ Student successfully saved to database with _id: ${result.insertedId.toString()}`);
+    }
 
     return NextResponse.json({ 
       success: true, 
       data: {
         insertedId: result.insertedId,
         student: {
-          _id: result.insertedId.toString(),
-          ...insertedStudent
+          ...insertedStudent,
+          _id: result.insertedId.toString()
         }
       }
     });

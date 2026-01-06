@@ -4,15 +4,27 @@ import { useEffect, useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { useAuthStore, useAuthStoreState } from '@/store/auth-store';
 import { useStudentStore } from '@/store/student-store';
-import { SchoolCalendar } from '@/components/dashboard/school-calendar';
-import { UpcomingEvents } from '@/components/dashboard/upcoming-events';
-import { VisionMission } from '@/components/dashboard/vision-mission';
-import { StudentsByBarangayChart } from '@/components/dashboard/students-by-barangay-chart';
-// Removed BarangayTabs UI per latest requirements
+// Lazy load heavy components for better initial load performance
 import { MapSkeleton } from '@/components/map/map-skeleton';
 import { MapErrorBoundary } from '@/components/map/map-error-boundary';
 
-// Dynamically import the map component to avoid SSR issues
+// Dynamically import heavy components
+const SchoolCalendar = dynamic(
+  () => import('@/components/dashboard/school-calendar').then(mod => ({ default: mod.SchoolCalendar })),
+  { ssr: false }
+);
+const UpcomingEvents = dynamic(
+  () => import('@/components/dashboard/upcoming-events').then(mod => ({ default: mod.UpcomingEvents })),
+  { ssr: false }
+);
+const VisionMission = dynamic(
+  () => import('@/components/dashboard/vision-mission').then(mod => ({ default: mod.VisionMission })),
+  { ssr: false }
+);
+const StudentsByBarangayChart = dynamic(
+  () => import('@/components/dashboard/students-by-barangay-chart').then(mod => ({ default: mod.StudentsByBarangayChart })),
+  { ssr: false }
+);
 const InteractiveMap = dynamic(
   () => import('@/components/map/interactive-map').then(mod => ({ default: mod.InteractiveMap })),
   {
