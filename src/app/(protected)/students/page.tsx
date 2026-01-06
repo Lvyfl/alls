@@ -383,18 +383,6 @@ export default function StudentsPage() {
     return [...filtered].sort((a, b) => a.name.localeCompare(b.name));
   }, [barangays, user?.role, user?.assignedBarangayId]);
 
-  // Handle Excel export with useCallback
-  const handleExportExcel = useCallback(() => {
-    try {
-      exportStudentMasterlist(students.filteredData, barangays);
-    } catch (error) {
-      console.error('Error exporting to Excel:', error);
-      alert('Failed to export to Excel. Please try again.');
-    }
-  }, [students.filteredData, barangays]);
-
-
-
   // Separate active (masterlist), inactive (archive/drop-out), and graduated students
   const masterlistStudents = useMemo(
     () => students.filteredData.filter(s => s.status === 'active'),
@@ -411,9 +399,36 @@ export default function StudentsPage() {
     [students.filteredData]
   );
 
+  // Handle Excel export with useCallback - export based on current mode
+  const handleExportExcel = useCallback(() => {
+    try {
+      // Determine which students to export based on current mode
+      let studentsToExport: Student[] = [];
+      
+      if (currentMode === 'masterlist') {
+        studentsToExport = masterlistStudents;
+      } else if (currentMode === 'archive') {
+        studentsToExport = archivedStudents;
+      } else if (currentMode === 'graduated') {
+        studentsToExport = graduatedStudents;
+      }
+
+      if (studentsToExport.length === 0) {
+        alert('No students to export in the current view.');
+        return;
+      }
+
+      // Export to Excel
+      exportStudentMasterlist(studentsToExport, barangays);
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      alert('Failed to export to Excel. Please try again.');
+    }
+  }, [currentMode, masterlistStudents, archivedStudents, graduatedStudents, barangays]);
+
   return (
     <div className="space-y-6 relative">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap gap-4">
         <div className="flex gap-2">
           {currentMode === 'masterlist' ? (
             <Button
@@ -470,14 +485,14 @@ export default function StudentsPage() {
           )}
         </div>
 
-        {user?.role === 'admin' ? (
+        {user && (user.role === 'admin' || user.role === 'teacher') && (
           <Button
             onClick={handleExportExcel}
-            className="bg-blue-600 hover:bg-blue-500 text-white cursor-pointer transition-all duration-200 hover:shadow-md"
+            className="bg-blue-600 hover:bg-blue-500 text-white cursor-pointer transition-all duration-200 hover:shadow-md flex-shrink-0"
           >
             <Download className="mr-2 h-4 w-4" /> Export to Excel
           </Button>
-        ) : null}
+        )}
       </div>
 
       {/* Barangay Tabs */}
