@@ -3,6 +3,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuthStore } from '@/store/auth-store';
 import { useProgressStore } from '@/store/progress-store';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 // Components
 import { BarangayTabs } from '@/components/students/barangay-tabs';
@@ -14,6 +21,16 @@ import { ProgressTableSkeleton } from '@/components/progress/progress-table-skel
 export default function ProgressPage() {
   // Get user from auth store
   const user = useAuthStore(state => state.auth.user);
+  
+  // Program filter state
+  const [programFilter, setProgramFilter] = useState<string>('all');
+
+  // Available program levels
+  const programLevels = [
+    'Basic Literacy (BLP)',
+    'A&E Elementary',
+    'A&E Secondary'
+  ];
 
   // Get progress store state and actions
   const {
@@ -55,6 +72,17 @@ export default function ProgressPage() {
       : barangays;
   }, [barangays, user?.role, user?.assignedBarangayId]);
 
+  // Get base filtered students (by barangay)
+  const baseFilteredStudents = getFilteredStudents();
+
+  // Filter students by program
+  const filteredStudentsByProgram = useMemo(() => {
+    if (programFilter === 'all') {
+      return baseFilteredStudents;
+    }
+    return baseFilteredStudents.filter(student => student.program === programFilter);
+  }, [baseFilteredStudents, programFilter]);
+
   return (
     <div className="space-y-6">
       {/* Barangay Tabs */}
@@ -69,6 +97,26 @@ export default function ProgressPage() {
         />
       )}
 
+      {/* Program Filter */}
+      <div className="flex items-center gap-3">
+        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          Filter by Program:
+        </label>
+        <Select value={programFilter} onValueChange={setProgramFilter}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Programs</SelectItem>
+            {programLevels.map((level) => (
+              <SelectItem key={level} value={level}>
+                {level}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Progress Table */}
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg border-4 border-blue-600 dark:border-blue-500">
         <div className="p-1">
@@ -76,7 +124,7 @@ export default function ProgressPage() {
             <ProgressTableSkeleton />
           ) : (
             <ProgressTable
-              students={getFilteredStudents()}
+              students={filteredStudentsByProgram}
               barangays={barangays}
               selectedBarangay={selectedBarangay}
             />

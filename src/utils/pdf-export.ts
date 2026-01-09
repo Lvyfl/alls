@@ -116,43 +116,43 @@ export async function exportStudentMasterlistPdf(
   doc.setFont('helvetica', 'bold');
   doc.text('District:', 10, 30);
   doc.setFont('helvetica', 'normal');
-  doc.text(district, 28, 30);
+  doc.text(district, 30, 30);
   
   doc.setFont('helvetica', 'bold');
-  doc.text('Division:', 70, 30);
+  doc.text('Division:', 65, 30);
   doc.setFont('helvetica', 'normal');
-  doc.text(division, 88, 30);
+  doc.text(division, 85, 30);
   
   doc.setFont('helvetica', 'bold');
-  doc.text('Region:', 130, 30);
+  doc.text('Region:', 115, 30);
   doc.setFont('helvetica', 'normal');
-  doc.text(region, 148, 30);
+  doc.text(region, 135, 30);
   
   doc.setFont('helvetica', 'bold');
-  doc.text('Calendar Year:', 220, 30);
+  doc.text('Calendar Year:', 230, 30);
   doc.setFont('helvetica', 'normal');
-  doc.text(currentYear.toString(), 248, 30);
+  doc.text(currentYear.toString(), 262, 30);
 
   // Header info - Row 2
   doc.setFont('helvetica', 'bold');
   doc.text('Name of CLC:', 10, 36);
   doc.setFont('helvetica', 'normal');
-  doc.text(clcName, 35, 36);
+  doc.text(clcName, 38, 36);
   
   doc.setFont('helvetica', 'bold');
-  doc.text('Type of CLC:', 100, 36);
+  doc.text('Type of CLC:', 115, 36);
   doc.setFont('helvetica', 'normal');
-  doc.text(clcType, 125, 36);
+  doc.text(clcType, 143, 36);
   
   doc.setFont('helvetica', 'bold');
-  doc.text('Barangay:', 150, 36);
+  doc.text('Barangay:', 170, 36);
   doc.setFont('helvetica', 'normal');
-  doc.text(selectedBarangayName, 172, 36);
+  doc.text(selectedBarangayName, 195, 36);
   
   doc.setFont('helvetica', 'bold');
-  doc.text('City/Municipality:', 220, 36);
+  doc.text('City/Municipality:', 230, 36);
   doc.setFont('helvetica', 'normal');
-  doc.text('INDANG', 252, 36);
+  doc.text('INDANG', 268, 36);
 
   // Calculate age from birthdate
   const calculateAge = (birthDate: string): number | string => {

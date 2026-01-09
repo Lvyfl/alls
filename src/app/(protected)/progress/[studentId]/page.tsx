@@ -18,7 +18,6 @@ import { shallow } from "zustand/shallow";
 // These are small JSON files, so importing them is fine for performance
 import studentsData from "@/data/students.json";
 import progressData from "@/data/progress.json";
-import modulesData from "@/data/modules.json";
 
 const generateFallbackModuleId = () => {
   if (typeof globalThis !== "undefined" && globalThis.crypto && typeof globalThis.crypto.randomUUID === "function") {
@@ -89,16 +88,24 @@ const dedupeModulesById = (modules: Module[]): Module[] => {
 const filterModulesForProgram = (modules: Module[], program?: string | null, barangayId?: string | null) => {
   let filtered = modules;
 
-  // Filter by barangayId: show modules for this barangay OR modules without barangayId (legacy/global)
+  // Filter by barangayId: show modules for this barangay OR global modules
   if (barangayId) {
     filtered = filtered.filter((module) => {
-      // Show module if:
-      // 1. Module has no barangayId (global module)
-      // 2. Module's barangayId matches the filter barangayId
-      // Use string comparison to handle potential type mismatches
-      const moduleBarangayId = module.barangayId ? String(module.barangayId) : null;
       const filterBarangayId = String(barangayId);
-      return !moduleBarangayId || moduleBarangayId === filterBarangayId;
+      
+      // Check barangayIds array first (new format - supports multiple barangays)
+      if (module.barangayIds && Array.isArray(module.barangayIds) && module.barangayIds.length > 0) {
+        return module.barangayIds.some((id) => String(id) === filterBarangayId);
+      }
+      
+      // Check single barangayId (legacy format)
+      if (module.barangayId) {
+        return String(module.barangayId) === filterBarangayId;
+      }
+      
+      // Global module (no barangayId and no barangayIds, or empty barangayIds)
+      // These should be visible to all students
+      return true;
     });
   }
 
@@ -291,6 +298,12 @@ function StudentActivitySummaryPageContent() {
   const [isDeletingModule, setIsDeletingModule] = useState(false);
   const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Check if module is hard-coded (from JSON file)
+  const isHardCodedModule = (module: Module | null) => {
+    if (!module) return false;
+    return typeof module._id === 'string' && module._id.startsWith('module-');
+  };
+
   useEffect(() => {
     return () => {
       if (successTimeoutRef.current) {
@@ -400,12 +413,9 @@ function StudentActivitySummaryPageContent() {
     return emptyStudentProgress;
   }, [student, progress, emptyStudentProgress]);
 
-  // Load modules (static + API) once - filter by student's barangay
+  // Load modules from API only - filter by student's barangay
   useEffect(() => {
     const initializeModules = async () => {
-      const fallbackModules = (modulesData as any[]).map(normalizeModuleRecord);
-      setAllModules(fallbackModules);
-
       try {
         // Determine which barangayId to use for filtering:
         // 1. Student's barangay (if student is loaded)
@@ -416,15 +426,13 @@ function StudentActivitySummaryPageContent() {
 
         const apiModules = await fetchModules(barangayIdForFilter);
         if (apiModules && apiModules.length > 0) {
-          setAllModules((prev) =>
-            dedupeModulesById([
-              ...prev,
-              ...apiModules.map(normalizeModuleRecord),
-            ])
-          );
+          setAllModules(dedupeModulesById(apiModules.map(normalizeModuleRecord)));
+        } else {
+          setAllModules([]);
         }
       } catch (error) {
         console.error("Error loading modules:", error);
+        setAllModules([]);
       }
     };
 
@@ -957,8 +965,9 @@ function StudentActivitySummaryPageContent() {
                 onClick={() => handleOpenModuleDialog("edit")}
                 variant="outline"
                 size="sm"
-                disabled={!selectedModule && availableModules.length === 0}
+                disabled={!selectedModule || availableModules.length === 0}
                 className="bg-amber-500 dark:bg-amber-600 text-white hover:bg-amber-400 dark:hover:bg-amber-500 border-amber-500 dark:border-amber-600 hover:border-amber-400 dark:hover:border-amber-500 cursor-pointer transition-all duration-200 hover:shadow-md flex items-center gap-2 disabled:bg-gray-300 disabled:text-gray-600 disabled:border-gray-300 disabled:cursor-not-allowed"
+                title="Edit module"
               >
                 <Pencil className="h-4 w-4" />
                 <span>Edit Module</span>
@@ -969,6 +978,7 @@ function StudentActivitySummaryPageContent() {
                 size="sm"
                 disabled={!selectedModuleData}
                 className="bg-red-600 dark:bg-red-700 text-white hover:bg-red-500 dark:hover:bg-red-600 border-red-600 dark:border-red-700 hover:border-red-500 dark:hover:border-red-600 cursor-pointer transition-all duration-200 hover:shadow-md flex items-center gap-2 disabled:bg-gray-300 disabled:text-gray-600 disabled:border-gray-300 disabled:cursor-not-allowed"
+                title="Delete module"
               >
                 <Trash2 className="h-4 w-4" />
                 <span>Delete Module</span>

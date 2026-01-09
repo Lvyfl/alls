@@ -171,6 +171,16 @@ export function AddCustomModuleDialog({
     });
   };
 
+  const handleSelectAllBarangays = () => {
+    if (selectedBarangays.length === barangays.length) {
+      // If all are selected, deselect all
+      setSelectedBarangays([]);
+    } else {
+      // Select all barangays
+      setSelectedBarangays(barangays.map(b => b._id));
+    }
+  };
+
   const validateForm = (): string | null => {
     if (!moduleTitle.trim()) {
       return 'Module name is required';
@@ -312,9 +322,19 @@ export function AddCustomModuleDialog({
           {/* Barangay Selection - Only show for admins */}
           {isAdmin && barangays.length > 0 && (
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-gray-900 dark:text-white">
-                Available For Barangays
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium text-gray-900 dark:text-white">
+                  Available For Barangays
+                </Label>
+                <button
+                  type="button"
+                  onClick={handleSelectAllBarangays}
+                  disabled={isSubmitting}
+                  className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 underline"
+                >
+                  {selectedBarangays.length === barangays.length ? 'Deselect All' : 'Select All Barangays'}
+                </button>
+              </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Select which barangays can access this module. Leave empty for all barangays.
               </p>

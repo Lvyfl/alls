@@ -17,6 +17,7 @@ export async function GET() {
           name: 1,
           status: 1,
           gender: 1,
+          birthDate: 1,
           barangayId: 1,
           program: 1,
           address: 1,

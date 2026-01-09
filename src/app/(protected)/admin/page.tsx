@@ -289,8 +289,7 @@ export default function AdminManagementPage() {
                 Create New Admin Account
               </DialogTitle>
               <DialogDescription className="text-gray-600 dark:text-gray-300">
-                Create a new Master Admin or Regular Admin account for the
-                system
+                Create a new Admin or Teacher account for the system
               </DialogDescription>
             </DialogHeader>
 
@@ -594,7 +593,7 @@ export default function AdminManagementPage() {
             Administrator Accounts
           </CardTitle>
           <CardDescription className="text-gray-600 dark:text-gray-300">
-            Manage all administrator accounts in the system
+            Create and manage teacher and admin accounts
           </CardDescription>
         </CardHeader>
         <CardContent>

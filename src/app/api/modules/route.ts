@@ -29,16 +29,34 @@ export async function GET(req: Request) {
         // Teacher without a barangay should not see any modules
         filter = { _id: null };
       } else {
-        // Teachers should see modules for their barangay AND global modules (without barangayId)
-        filter = { $or: [{ barangayId: effectiveBarangayId }, { barangayId: { $exists: false } }] };
+        // Teachers should see:
+        // 1. Modules with barangayId matching their assigned barangay (legacy format)
+        // 2. Modules with barangayIds array containing their assigned barangay (new format)
+        // 3. Global modules (without barangayId or barangayIds)
+        filter = { 
+          $or: [
+            { barangayId: effectiveBarangayId },
+            { barangayIds: effectiveBarangayId },
+            { barangayId: { $exists: false }, barangayIds: { $exists: false } }
+          ] 
+        };
       }
     } else {
       // Master admin or other roles
-      // If barangayId is provided, filter by it and also include legacy/global modules without barangayId
+      // If barangayId is provided, filter by it and also include modules with barangayIds array or global modules
       // Otherwise, return all modules
-      filter = barangayId
-        ? { $or: [{ barangayId: barangayId }, { barangayId: { $exists: false } }] }
-        : {};
+      if (barangayId) {
+        filter = {
+          $or: [
+            { barangayId: barangayId },
+            { barangayIds: barangayId },
+            { barangayId: { $exists: false }, barangayIds: { $exists: false } },
+            { barangayIds: { $size: 0 } }
+          ]
+        };
+      } else {
+        filter = {};
+      }
     }
 
     // Use projection to only fetch needed fields for better performance
@@ -336,13 +354,30 @@ export async function PATCH(req: Request) {
       }
     }
     
-    // Handle barangayId update (legacy format): admins can change, teachers stay assigned
+    // Handle barangayId update (legacy format): only admins can change barangayId
+    // Teachers should NOT change module ownership - they can only edit content
     if (barangayId !== undefined && userRole === 'admin' && !barangayIds) {
       updatePayload.barangayId = barangayId || null; // Allow setting to null for global modules
-    } else if (userRole === 'teacher' && assignedBarangayId) {
-      // Ensure teacher's modules stay assigned to their barangay
-      updatePayload.barangayId = assignedBarangayId;
     }
+    
+    // IMPORTANT: If admin is editing and no barangayId/barangayIds was provided,
+    // preserve the existing module's barangay assignment to prevent it from becoming orphaned
+    if (userRole === 'admin' && existingModule) {
+      // Only preserve if neither barangayId nor barangayIds was explicitly provided in the update
+      const hasBarangayUpdate = barangayId !== undefined || barangayIds !== undefined;
+      
+      if (!hasBarangayUpdate) {
+        // Preserve existing barangay assignment
+        if (existingModule.barangayIds && existingModule.barangayIds.length > 0) {
+          updatePayload.barangayIds = existingModule.barangayIds;
+        } else if (existingModule.barangayId) {
+          updatePayload.barangayId = existingModule.barangayId;
+        }
+      }
+    }
+    
+    // Note: Teachers do NOT override barangayId - this preserves global modules as global
+    // and prevents duplication issues when teachers edit modules
 
     if (Object.keys(updatePayload).length === 0) {
       return NextResponse.json(
@@ -378,12 +413,13 @@ export async function PATCH(req: Request) {
       };
 
       // Set barangayId based on user role and provided data
-      if (barangayId !== undefined) {
+      // For hard-coded modules being converted, preserve them as global modules
+      // so all teachers can still see them
+      if (barangayId !== undefined && userRole === 'admin') {
         insertData.barangayId = barangayId || null;
-      } else if (userRole === 'teacher' && assignedBarangayId) {
-        insertData.barangayId = assignedBarangayId;
-      } else if (userRole === 'admin') {
-        // Admin can create global modules (barangayId = null)
+      } else {
+        // Keep as global module (no barangayId) so all users can see it
+        // This prevents duplication when teachers edit hard-coded modules
         insertData.barangayId = null;
       }
 

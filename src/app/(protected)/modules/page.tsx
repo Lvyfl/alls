@@ -5,8 +5,6 @@ import { useAuthStoreState } from '@/store/auth-store';
 import { useStudentStore } from '@/store/student-store';
 import { Module, PredefinedActivity } from '@/types';
 import { fetchModules, createModule, updateModule, deleteModule } from '@/services/api';
-// Import static modules data as fallback (same as student score summary)
-import modulesData from '@/data/modules.json';
 import { AddCustomModuleDialog } from '@/components/progress/add-custom-module-dialog';
 import { Button } from '@/components/ui/button';
 import {
@@ -138,9 +136,13 @@ export default function ModulesPage() {
   const programLevels = [
     'Basic Literacy (BLP)',
     'A&E Elementary',
-    'A&E Secondary',
-    'All Programs'
+    'A&E Secondary'
   ];
+
+  // Check if module is hard-coded (from JSON file)
+  const isHardCodedModule = (module: Module) => {
+    return typeof module._id === 'string' && module._id.startsWith('module-');
+  };
 
   // Fetch barangays and students on mount
   useEffect(() => {
@@ -152,35 +154,22 @@ export default function ModulesPage() {
     }
   }, [barangays.length, studentsList.length]);
 
-  // Fetch modules (static + API) - same approach as student score summary
+  // Fetch modules from API only
   const loadModules = useCallback(async () => {
     try {
       setLoading(true);
       
-      // Start with static modules from JSON file (fallback)
-      const fallbackModules = (modulesData as any[]).map(normalizeModuleRecord);
-      let allModules = [...fallbackModules];
-
-      try {
-        // Fetch modules from API
-        const barangayIdForFilter = user?.role === 'teacher' ? user.assignedBarangayId : undefined;
-        const apiModules = await fetchModules(barangayIdForFilter);
-        
-        if (apiModules && apiModules.length > 0) {
-          // Combine static and API modules, dedupe by ID
-          allModules = dedupeModulesById([
-            ...allModules,
-            ...apiModules.map(normalizeModuleRecord),
-          ]);
-        }
-      } catch (apiError) {
-        console.error('Error loading API modules:', apiError);
-        // Continue with static modules if API fails
+      const barangayIdForFilter = user?.role === 'teacher' ? user.assignedBarangayId : undefined;
+      const apiModules = await fetchModules(barangayIdForFilter);
+      
+      if (apiModules && apiModules.length > 0) {
+        setModules(dedupeModulesById(apiModules.map(normalizeModuleRecord)));
+      } else {
+        setModules([]);
       }
-
-      setModules(allModules);
     } catch (error) {
       console.error('Error loading modules:', error);
+      setModules([]);
     } finally {
       setLoading(false);
     }
@@ -194,6 +183,10 @@ export default function ModulesPage() {
   const getBarangayNames = (module: Module) => {
     // Check for barangayIds array first (new format)
     if (module.barangayIds && module.barangayIds.length > 0) {
+      // If all barangays are selected, show "All Barangays"
+      if (module.barangayIds.length === barangays.length) {
+        return 'All Barangays';
+      }
       const names = module.barangayIds
         .map((id) => barangays.find((b) => b._id === id)?.name)
         .filter(Boolean);
@@ -209,9 +202,15 @@ export default function ModulesPage() {
   const getLearnerCount = useCallback((module: Module): number => {
     return studentsList.filter(student => {
       // IMPORTANT: Teachers can only see students from their assigned barangay
-      // Only admins can see students from all barangays
       if (user?.role === 'teacher' && user?.assignedBarangayId) {
         if (student.barangayId !== user.assignedBarangayId) {
+          return false;
+        }
+      }
+
+      // For admins: Apply the page's barangay filter first if set
+      if (user?.role === 'admin' && barangayFilter && barangayFilter !== 'all') {
+        if (student.barangayId !== barangayFilter) {
           return false;
         }
       }
@@ -230,12 +229,7 @@ export default function ModulesPage() {
         return student.barangayId === module.barangayId;
       }
 
-      // Global module - apply page's barangay filter if set
-      if (barangayFilter && barangayFilter !== 'all') {
-        return student.barangayId === barangayFilter;
-      }
-
-      // Global module with no filter - count all students with matching program
+      // Global module - count all students with matching program
       return true;
     }).length;
   }, [studentsList, barangayFilter, user?.role, user?.assignedBarangayId]);
@@ -264,10 +258,10 @@ export default function ModulesPage() {
   const handleUpdateModule = useCallback(
     async (moduleId: string, moduleData: ModuleFormValues) => {
       try {
-        const barangayId = user?.role === 'teacher' ? user.assignedBarangayId : undefined;
+        // Don't override barangayId for teachers - let the API handle it
+        // This prevents teachers from accidentally changing module ownership
         await updateModule(moduleId, {
           ...moduleData,
-          barangayId,
           barangayIds: moduleData.barangayIds, // Pass barangayIds array for multi-barangay support
         });
         await loadModules(); // Refresh the list
@@ -278,7 +272,7 @@ export default function ModulesPage() {
         throw error;
       }
     },
-    [user?.role, user?.assignedBarangayId, loadModules]
+    [loadModules]
   );
 
   // Handle save activities
@@ -287,12 +281,11 @@ export default function ModulesPage() {
       if (!moduleForActivities) return;
 
       try {
-        const barangayId = user?.role === 'teacher' ? user.assignedBarangayId : undefined;
+        // Don't override barangayId - preserve existing module ownership
         await updateModule(moduleForActivities._id, {
           title: moduleForActivities.title,
           levels: moduleForActivities.levels,
           predefinedActivities: activities,
-          barangayId,
         });
         await loadModules(); // Refresh the list
       } catch (error) {
@@ -300,7 +293,7 @@ export default function ModulesPage() {
         throw error;
       }
     },
-    [moduleForActivities, user?.role, user?.assignedBarangayId, loadModules]
+    [moduleForActivities, loadModules]
   );
 
   // Open activities dialog
@@ -382,8 +375,8 @@ export default function ModulesPage() {
           return String(module.barangayId) === filterBarangayId;
         }
         
-        // Global modules (no barangayId/barangayIds) - show for all barangays since they're program-based
-        return true;
+        // Global modules (no barangayId/barangayIds) - hide when filtering by specific barangay
+        return false;
       });
     }
 
@@ -520,7 +513,6 @@ export default function ModulesPage() {
                     <TableHead className="text-white font-bold">Title</TableHead>
                     <TableHead className="text-white font-bold">Program Levels</TableHead>
                     <TableHead className="text-white font-bold">Activities</TableHead>
-                    <TableHead className="text-white font-bold">Barangay</TableHead>
                     {(user?.role === 'admin' || user?.role === 'teacher') && (
                       <TableHead className="text-white font-bold w-[180px]">Actions</TableHead>
                     )}
@@ -557,9 +549,6 @@ export default function ModulesPage() {
                       <TableCell className="text-gray-900 dark:text-white">
                         {module.predefinedActivities?.length || 0} activities
                       </TableCell>
-                      <TableCell className="text-gray-900 dark:text-white">
-                        {getBarangayNames(module)}
-                      </TableCell>
                       {(user?.role === 'admin' || user?.role === 'teacher') && (
                         <TableCell>
                           <div className="flex gap-2">
@@ -591,6 +580,7 @@ export default function ModulesPage() {
                               size="sm"
                               onClick={() => handleOpenEditDialog(module)}
                               className="border-blue-600 text-blue-700 dark:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                              title="Edit module"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -599,6 +589,7 @@ export default function ModulesPage() {
                               size="sm"
                               onClick={() => setModuleToDelete(module)}
                               className="border-red-600 text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
+                              title="Delete module"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>

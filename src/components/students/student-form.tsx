@@ -64,6 +64,7 @@ export function StudentForm({ student, barangays, user, onSubmit, onCancel, isSu
       name: student?.name || '',
       status: student?.status || 'active',
       gender: student?.gender || 'male',
+      birthDate: student?.birthDate || '',
       address: student?.address || '',
       barangayId: student?.barangayId || (user?.role === 'teacher' && user?.assignedBarangayId ? user.assignedBarangayId : ''),
       program: student?.program || '',
@@ -240,6 +241,25 @@ export function StudentForm({ student, barangays, user, onSubmit, onCancel, isSu
                     ))}
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Birth Date */}
+          <FormField
+            control={form.control}
+            name="birthDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-blue-700 font-semibold">Birth Date</FormLabel>
+                <FormControl>
+                  <Input
+                    type="date"
+                    className="border-blue-200 focus:border-blue-500 focus:ring-blue-500"
+                    {...field}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

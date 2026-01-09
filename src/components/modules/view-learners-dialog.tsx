@@ -105,6 +105,13 @@ export function ViewLearnersDialog({
           }
         }
 
+        // For admins: Apply the page's barangay filter first if set
+        if (userRole === 'admin' && barangayFilter && barangayFilter !== 'all') {
+          if (student.barangayId !== barangayFilter) {
+            return false;
+          }
+        }
+
         // Check if student's program matches module's levels
         const programMatches = moduleLevels.some(
           level => level === student.program || level === "All Programs"
@@ -112,7 +119,7 @@ export function ViewLearnersDialog({
 
         if (!programMatches) return false;
 
-        // Filter by module's assigned barangay(s) first - this takes priority
+        // Filter by module's assigned barangay(s) - check if student is eligible for this module
         // If module has barangayIds array, check if student's barangay is in the array
         if (moduleBarangayIds && moduleBarangayIds.length > 0) {
           return moduleBarangayIds.includes(student.barangayId);
@@ -123,12 +130,7 @@ export function ViewLearnersDialog({
           return student.barangayId === moduleBarangayId;
         }
         
-        // Module is global (no barangay assignment) - apply page's barangay filter
-        if (barangayFilter && barangayFilter !== 'all') {
-          return student.barangayId === barangayFilter;
-        }
-        
-        // Global module with no filter - show all students with matching program
+        // Global module (no barangay assignment) - show all students with matching program
         return true;
       });
 
