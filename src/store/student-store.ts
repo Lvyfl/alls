@@ -40,7 +40,7 @@ export const useStudentStore = create<{
   errorBarangays: string | null;
   // Actions
   fetchStudents: () => Promise<void>;
-  fetchBarangays: (user?: User | null) => Promise<void>;
+  fetchBarangays: (user?: User | null, forceRefresh?: boolean) => Promise<void>;
   setSearchQuery: (query: string) => void;
   setSelectedBarangay: (barangayId: string) => void;
   filterStudents: () => void;
@@ -104,14 +104,15 @@ export const useStudentStore = create<{
     },
 
     // Fetch barangays with optional user context for proper barangay selection
-    fetchBarangays: async (user?: User | null) => {
+    // forceRefresh: true bypasses cache (use after create/delete operations)
+    fetchBarangays: async (user?: User | null, forceRefresh: boolean = false) => {
       set(state => {
         state.loadingBarangays = true;
         state.errorBarangays = null;
       });
 
       try {
-        const barangays = await fetchBarangays();
+        const barangays = await fetchBarangays(forceRefresh);
 
         set(state => {
           state.barangays = barangays;

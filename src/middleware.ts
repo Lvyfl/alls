@@ -7,6 +7,7 @@ const protectedRoutes = [
   '/dashboard',
   '/students',
   '/progress',
+  '/modules',
   '/settings',
   '/profile',
 ];

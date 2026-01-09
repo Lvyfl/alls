@@ -7,12 +7,22 @@ export async function GET(req: Request) {
     const db = client.db("main");
     const url = new URL(req.url);
     const studentId = url.searchParams.get("studentId");
+    const moduleId = url.searchParams.get("moduleId");
+    
+    // Build filter based on provided parameters
+    const filter: any = {};
+    if (studentId) {
+      filter.studentId = studentId;
+    }
+    if (moduleId) {
+      filter.moduleId = moduleId;
+    }
     
     // Use projection to only fetch needed fields for better performance
     const progress = await db
       .collection("progress")
       .find(
-        { studentId: studentId },
+        filter,
         {
           projection: {
             _id: 1,
@@ -158,11 +168,12 @@ export async function PATCH(req: Request) {
           { $set: { [`activities.${activityIndex}`]: activity } }
         );
 
-      if (result.modifiedCount === 0) {
+      // Check if record was found (matchedCount) - modifiedCount can be 0 if data is the same
+      if (result.matchedCount === 0) {
         return NextResponse.json(
           {
             success: false,
-            error: "No progress record found or no changes made",
+            error: "No progress record found",
           },
           { status: 404 }
         );

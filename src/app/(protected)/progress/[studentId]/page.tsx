@@ -54,6 +54,7 @@ const normalizeModuleRecord = (module: any): Module => {
       }))
       : [],
     barangayId: module?.barangayId,
+    barangayIds: Array.isArray(module?.barangayIds) ? module.barangayIds : undefined,
     createdAt: module?.createdAt,
   };
 };
@@ -250,8 +251,8 @@ function StudentActivitySummaryPageContent() {
     fetchStudents,
   } = useStableStoreData();
 
-  // Get barangays from progress store
-  const { barangays } = useProgressStore();
+  // Get barangays and selectedBarangay from progress store
+  const { barangays, selectedBarangay } = useProgressStore();
 
   // Get user to access assigned barangay for module filtering
   const { user } = useAuthStoreState();
@@ -493,12 +494,12 @@ function StudentActivitySummaryPageContent() {
         
         if (!moduleToEdit) {
           console.warn("No module selected for editing");
-          return;
-        }
+        return;
+      }
         
-        setModuleDialogMode(mode);
+      setModuleDialogMode(mode);
         setModuleBeingEdited(moduleToEdit);
-        setIsModuleDialogOpen(true);
+      setIsModuleDialogOpen(true);
       } else {
         setModuleDialogMode(mode);
         setModuleBeingEdited(null);
@@ -512,11 +513,20 @@ function StudentActivitySummaryPageContent() {
     async (moduleData: ModuleFormPayload) => {
       try {
         // Determine barangayId: 
-        // For teachers: always use their assigned barangayId (not student's barangay)
-        // This ensures modules are associated with the teacher's barangay
-        const barangayId = user?.role === 'teacher' 
-          ? user.assignedBarangayId 
-          : (student?.barangayId || undefined);
+        // For teachers: always use their assigned barangayId
+        // For admins: use the selected barangay from the progress store, or fall back to student's barangay
+        // This ensures modules are always assigned to a specific barangay (not global)
+        let barangayId: string | undefined;
+        if (user?.role === 'teacher') {
+          barangayId = user.assignedBarangayId;
+        } else if (selectedBarangay && selectedBarangay !== 'all') {
+          // Admin with specific barangay selected - use that barangay
+          barangayId = selectedBarangay;
+        } else {
+          // Admin with 'all' selected or no selection - use student's barangay
+          // This ensures the module is assigned to the student's barangay, not created as global
+          barangayId = student?.barangayId;
+        }
 
         const modulePayload = {
           ...moduleData,
@@ -554,17 +564,25 @@ function StudentActivitySummaryPageContent() {
         throw error instanceof Error ? error : new Error("Failed to create module");
       }
     },
-    [displaySuccessMessage, student?.barangayId, user?.role, user?.assignedBarangayId]
+    [displaySuccessMessage, selectedBarangay, student?.barangayId, user?.role, user?.assignedBarangayId]
   );
 
   const handleUpdateModule = useCallback(
     async (moduleId: string, moduleData: ModuleFormPayload) => {
       try {
-        // Determine barangayId: use student's barangay or admin's assigned barangay
-        // Note: For updates, we preserve the existing barangayId unless user is master_admin
-        const barangayId = user?.role === 'admin'
-          ? (student?.barangayId || user.assignedBarangayId || undefined)
-          : (student?.barangayId || user?.assignedBarangayId || undefined);
+        // Determine barangayId: 
+        // For teachers: always use their assigned barangayId
+        // For admins: use the selected barangay from the progress store, or fall back to student's barangay
+        let barangayId: string | undefined;
+        if (user?.role === 'teacher') {
+          barangayId = user.assignedBarangayId;
+        } else if (selectedBarangay && selectedBarangay !== 'all') {
+          // Admin with specific barangay selected - use that barangay
+          barangayId = selectedBarangay;
+        } else {
+          // Admin with 'all' selected or no selection - use student's barangay
+          barangayId = student?.barangayId;
+        }
 
         const modulePayload = {
           ...moduleData,
@@ -594,7 +612,7 @@ function StudentActivitySummaryPageContent() {
         throw error instanceof Error ? error : new Error("Failed to update module");
       }
     },
-    [displaySuccessMessage, student?.barangayId, user?.role, user?.assignedBarangayId, selectedModule]
+    [displaySuccessMessage, selectedBarangay, student?.barangayId, user?.role, user?.assignedBarangayId, selectedModule]
   );
 
   const handleConfirmModuleDeletion = useCallback(async () => {
@@ -761,7 +779,7 @@ function StudentActivitySummaryPageContent() {
         alert(`Failed to ${activityIndex === -1 ? 'add' : 'update'} activity. Please try again.`);
       }
     },
-    [studentId, selectedModule, fetchProgress, student, studentProgress, displaySuccessMessage]
+    [studentId, selectedModule, student, studentProgress, displaySuccessMessage]
   );
 
   const handleActivityDelete = useCallback(
@@ -779,7 +797,7 @@ function StudentActivitySummaryPageContent() {
         alert("Failed to delete activity. Please try again.");
       }
     },
-    [studentId, selectedModule, fetchProgress, student, displaySuccessMessage]
+    [studentId, selectedModule, student, displaySuccessMessage]
   );
 
 
@@ -971,29 +989,29 @@ function StudentActivitySummaryPageContent() {
                   {availableModules.map((module) => {
                     const isNew = isModuleNew(module);
                     return (
-                      <TabsTrigger
-                        key={module._id}
-                        value={module._id}
-                        className={`flex flex-col items-start justify-between text-left font-semibold whitespace-normal break-words
-                          min-w-[160px] sm:min-w-[180px] md:min-w-[200px] max-w-full
-                          px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border shadow-sm text-xs sm:text-sm md:text-base
+                    <TabsTrigger
+                      key={module._id}
+                      value={module._id}
+                      className={`flex flex-col items-start justify-between text-left font-semibold whitespace-normal break-words
+                        min-w-[160px] sm:min-w-[180px] md:min-w-[200px] max-w-full
+                        px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg border shadow-sm text-xs sm:text-sm md:text-base
                           transition-all duration-200 relative
-                          ${selectedModule === module._id
-                            ? "!bg-blue-600 dark:!bg-blue-700 !text-white border-blue-600 dark:border-blue-500 shadow-md scale-[1.01]"
-                            : "bg-white dark:bg-slate-800 !text-gray-800 dark:!text-gray-100 border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-slate-700 hover:border-blue-300 dark:hover:border-blue-400"
-                          }`}
-                      >
+                        ${selectedModule === module._id
+                          ? "!bg-blue-600 dark:!bg-blue-700 !text-white border-blue-600 dark:border-blue-500 shadow-md scale-[1.01]"
+                          : "bg-white dark:bg-slate-800 !text-gray-800 dark:!text-gray-100 border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-slate-700 hover:border-blue-300 dark:hover:border-blue-400"
+                        }`}
+                    >
                         <div className="flex items-start gap-2 w-full">
                           <span className="block leading-snug sm:leading-normal break-words line-clamp-2 flex-1">
-                            {module.title}
-                          </span>
+                        {module.title}
+                      </span>
                           {isNew && (
                             <span className="flex-shrink-0 inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-green-500 text-white dark:bg-green-600 dark:text-white shadow-sm" title="New module">
                               NEW
                             </span>
                           )}
                         </div>
-                      </TabsTrigger>
+                    </TabsTrigger>
                     );
                   })}
                 </TabsList>

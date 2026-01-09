@@ -19,6 +19,7 @@ interface StudentTableProps {
   students: Student[];
   barangays: Barangay[];
   mode: 'masterlist' | 'archive' | 'graduated';
+  sortMode?: 'by-barangay' | 'alphabetical';
   onEdit: (student: Student, selectedStudentIds?: string[]) => void;
   onArchive: (student: Student, selectedStudentIds?: string[]) => void;
   onGraduate?: (student: Student, selectedStudentIds?: string[]) => void;
@@ -30,6 +31,7 @@ export const StudentTable = memo(function StudentTable({
   students,
   barangays,
   mode,
+  sortMode = 'by-barangay',
   onEdit,
   onArchive,
   onGraduate,
@@ -144,25 +146,32 @@ export const StudentTable = memo(function StudentTable({
     return map;
   }, [barangays]);
 
-  // Sort students with memoization - group by barangay first, then alphabetical within each barangay
+  // Sort students with memoization - based on sortMode
   const sortedStudents = useMemo(() => {
     return [...students].sort((a, b) => {
-      // Get barangay names for comparison
-      const barangayA = barangayNameMap.get(a.barangayId) || '';
-      const barangayB = barangayNameMap.get(b.barangayId) || '';
+      if (sortMode === 'alphabetical') {
+        // Sort alphabetically by name regardless of barangay
+        const nameA = a.name || '';
+        const nameB = b.name || '';
+        return nameA.localeCompare(nameB);
+      } else {
+        // Sort by barangay first, then alphabetical within each barangay (default)
+        const barangayA = barangayNameMap.get(a.barangayId) || '';
+        const barangayB = barangayNameMap.get(b.barangayId) || '';
 
-      // First, sort by barangay name alphabetically
-      const barangayComparison = barangayA.localeCompare(barangayB);
-      if (barangayComparison !== 0) {
-        return barangayComparison;
+        // First, sort by barangay name alphabetically
+        const barangayComparison = barangayA.localeCompare(barangayB);
+        if (barangayComparison !== 0) {
+          return barangayComparison;
+        }
+
+        // If same barangay, sort by student name alphabetically
+        const nameA = a.name || '';
+        const nameB = b.name || '';
+        return nameA.localeCompare(nameB);
       }
-
-      // If same barangay, sort by student name alphabetically
-      const nameA = a.name || '';
-      const nameB = b.name || '';
-      return nameA.localeCompare(nameB);
     });
-  }, [students, barangayNameMap]);
+  }, [students, barangayNameMap, sortMode]);
 
 
 
@@ -204,7 +213,7 @@ export const StudentTable = memo(function StudentTable({
                 className="text-white font-bold cursor-pointer w-[100px]"
                 onClick={() => handleSort('gender')}
               >
-                GENDER
+                SEX
                 {sortField === 'gender' && (
                   <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                 )}

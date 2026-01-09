@@ -12,19 +12,20 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'
 
 export function StudentsByBarangayChart({ students, barangays }: StudentsByBarangayChartProps) {
   const { chartData, totalStudents } = useMemo(() => {
+    // Include all barangays, even those with 0 students
     const data = barangays.map(barangay => ({
       name: barangay.name,
       value: students.filter(student => student.barangayId === barangay._id).length
-    })).filter(item => item.value > 0);
+    })).sort((a, b) => b.value - a.value); // Sort by value descending for better visualization
 
     const total = data.reduce((sum, item) => sum + item.value, 0);
 
     return { chartData: data, totalStudents: total };
   }, [students, barangays]);
 
-  if (chartData.length === 0) {
+  if (barangays.length === 0) {
     return (
-      <div className="text-center text-gray-500 py-8">No student data available for the chart.</div>
+      <div className="text-center text-gray-500 py-8">No barangays available for the chart.</div>
     );
   }
 
@@ -53,7 +54,7 @@ export function StudentsByBarangayChart({ students, barangays }: StudentsByBaran
                     {entry.value} student{entry.value !== 1 ? 's' : ''}
                   </span>
                   <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 flex-shrink-0 ml-2">
-                    {((entry.value / totalStudents) * 100).toFixed(1)}%
+                    {totalStudents > 0 ? ((entry.value / totalStudents) * 100).toFixed(1) : '0.0'}%
                   </span>
                 </div>
               </div>
@@ -62,9 +63,9 @@ export function StudentsByBarangayChart({ students, barangays }: StudentsByBaran
         </div>
       </div>
       
-      {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-4">
-        {chartData.slice(0, 3).map((entry, index) => (
+      {/* Summary cards - Show all barangays */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {chartData.map((entry, index) => (
           <div key={entry.name} className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-lg border border-blue-200 dark:border-blue-600">
             <div 
               className="w-3 h-3 rounded-full mx-auto mb-2" 

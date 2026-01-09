@@ -216,20 +216,20 @@ export function StudentForm({ student, barangays, user, onSubmit, onCancel, isSu
           />
 
 
-          {/* Gender */}
+          {/* Sex */}
           <FormField
             control={form.control}
             name="gender"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-blue-700 font-semibold">Gender</FormLabel>
+                <FormLabel className="text-blue-700 font-semibold">Sex</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger className="border-blue-200 focus:border-blue-500 focus:ring-blue-500">
-                      <SelectValue placeholder="Select gender" />
+                      <SelectValue placeholder="Select sex" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>

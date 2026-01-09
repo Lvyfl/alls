@@ -17,7 +17,8 @@ import {
   Settings,
   LogOut,
   ChevronDown,
-  Shield
+  Shield,
+  BookOpen
 } from 'lucide-react';
 
 // Navigation items for all users
@@ -25,6 +26,7 @@ const commonNavItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Student Master List', href: '/students', icon: Users },
   { name: 'Student Score Summary', href: '/progress', icon: LineChart },
+  { name: 'Module Management', href: '/modules', icon: BookOpen },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 

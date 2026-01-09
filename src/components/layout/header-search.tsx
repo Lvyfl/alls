@@ -27,7 +27,7 @@ export function HeaderSearch() {
         // This is a student-specific progress page, don't show search
         setCurrentPage(null);
       } else {
-        setCurrentPage('progress');
+      setCurrentPage('progress');
       }
     } else if (pathname.includes('/dashboard')) {
       setCurrentPage('dashboard');

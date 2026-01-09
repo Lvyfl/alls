@@ -45,6 +45,7 @@ export interface Student {
   lastName?: string;
   status: Status;
   gender: Gender;
+  birthDate?: string; // Birth date (mm/dd/yyyy)
   address: string;
   barangayId: string;
   program: Program | string;
@@ -71,6 +72,7 @@ export interface Module {
   levels: string[];
   predefinedActivities?: PredefinedActivity[];
   barangayId?: string; // Optional: if not set, module is available to all barangays (for backward compatibility)
+  barangayIds?: string[]; // Optional: array of barangay IDs this module is available to
   createdAt?: string; // ISO date string for when the module was created
 }
 

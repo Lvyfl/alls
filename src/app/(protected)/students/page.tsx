@@ -8,6 +8,7 @@ import { StudentFormValues } from '@/validators/student-validators';
 
 // Components
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -17,7 +18,10 @@ import {
 } from '@/components/ui/dialog';
 import { BarangayTabs } from '@/components/students/barangay-tabs';
 import { BarangayTabsSkeleton } from '@/components/students/barangay-tabs-skeleton';
-import { Plus, Download } from 'lucide-react';
+import { Plus, Download, Trash2 } from 'lucide-react';
+import { AddBarangayDialog } from '@/components/students/add-barangay-dialog';
+import { DeleteBarangayDialog } from '@/components/students/delete-barangay-dialog';
+import { PdfExportDialog, PdfExportOptions } from '@/components/students/pdf-export-dialog';
 
 // Lazy load heavy components for better initial load performance
 import dynamic from 'next/dynamic';
@@ -42,7 +46,7 @@ const StudentDetailsDialog = dynamic(
 );
 
 // Regular import for utility function (not a component)
-import { exportStudentMasterlist } from '@/utils/excel-export';
+import { exportStudentMasterlist, exportStudentMasterlistPdf } from '@/utils/excel-export';
 
 export default function StudentsPage() {
   // Get user from auth store
@@ -62,7 +66,8 @@ export default function StudentsPage() {
     graduateStudent,
     removeStudent,
     initializeWithUser,
-    fetchStudents
+    fetchStudents,
+    fetchBarangays
   } = useStudentStore();
 
   // Local state for dialogs
@@ -89,6 +94,12 @@ export default function StudentsPage() {
   const [archiveError, setArchiveError] = useState<string | null>(null);
   const [currentMode, setCurrentMode] = useState<'masterlist' | 'archive' | 'graduated'>('masterlist');
   const [isRemoving, setIsRemoving] = useState(false);
+  const [deleteBarangayDialogOpen, setDeleteBarangayDialogOpen] = useState(false);
+  const [barangayToDelete, setBarangayToDelete] = useState<{ _id: string; name: string; address?: string } | null>(null);
+  const [addBarangayDialogOpen, setAddBarangayDialogOpen] = useState(false);
+  const [sortMode, setSortMode] = useState<'by-barangay' | 'alphabetical'>('by-barangay');
+  const [pdfExportDialogOpen, setPdfExportDialogOpen] = useState(false);
+  const [studentsToExportPdf, setStudentsToExportPdf] = useState<Student[]>([]);
 
   // Fetch data on component mount with user context for proper barangay selection
   useEffect(() => {
@@ -400,7 +411,7 @@ export default function StudentsPage() {
   );
 
   // Handle Excel export with useCallback - export based on current mode
-  const handleExportExcel = useCallback(() => {
+  const handleExportExcel = useCallback(async () => {
     try {
       // Determine which students to export based on current mode
       let studentsToExport: Student[] = [];
@@ -418,13 +429,46 @@ export default function StudentsPage() {
         return;
       }
 
-      // Export to Excel
-      exportStudentMasterlist(studentsToExport, barangays);
+      // Export to Excel with selected barangay for header
+      await exportStudentMasterlist(studentsToExport, barangays, selectedBarangay);
     } catch (error) {
       console.error('Error exporting to Excel:', error);
       alert('Failed to export to Excel. Please try again.');
     }
-  }, [currentMode, masterlistStudents, archivedStudents, graduatedStudents, barangays]);
+  }, [currentMode, masterlistStudents, archivedStudents, graduatedStudents, barangays, selectedBarangay]);
+
+  // Handle PDF export - open dialog first
+  const handleExportPdfClick = useCallback(() => {
+    // Determine which students to export based on current mode
+    let studentsToExport: Student[] = [];
+    
+    if (currentMode === 'masterlist') {
+      studentsToExport = masterlistStudents;
+    } else if (currentMode === 'archive') {
+      studentsToExport = archivedStudents;
+    } else if (currentMode === 'graduated') {
+      studentsToExport = graduatedStudents;
+    }
+
+    if (studentsToExport.length === 0) {
+      alert('No students to export in the current view.');
+      return;
+    }
+
+    // Store students and open dialog
+    setStudentsToExportPdf(studentsToExport);
+    setPdfExportDialogOpen(true);
+  }, [currentMode, masterlistStudents, archivedStudents, graduatedStudents]);
+
+  // Handle actual PDF export after dialog confirmation
+  const handleExportPdf = useCallback(async (options: PdfExportOptions) => {
+    try {
+      await exportStudentMasterlistPdf(studentsToExportPdf, barangays, selectedBarangay, options);
+    } catch (error) {
+      console.error('Error exporting to PDF:', error);
+      alert('Failed to export to PDF. Please try again.');
+    }
+  }, [studentsToExportPdf, barangays, selectedBarangay]);
 
   return (
     <div className="space-y-6 relative">
@@ -485,28 +529,89 @@ export default function StudentsPage() {
           )}
         </div>
 
-        {user && (user.role === 'admin' || user.role === 'teacher') && (
-          <Button
-            onClick={handleExportExcel}
-            className="bg-blue-600 hover:bg-blue-500 text-white cursor-pointer transition-all duration-200 hover:shadow-md flex-shrink-0"
-          >
-            <Download className="mr-2 h-4 w-4" /> Export to Excel
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {user && user.role === 'admin' && (
+            <>
+              <Button
+                onClick={() => setAddBarangayDialogOpen(true)}
+                className="bg-green-600 hover:bg-green-500 text-white cursor-pointer transition-all duration-200 hover:shadow-md flex-shrink-0"
+              >
+                <Plus className="mr-2 h-4 w-4" /> Add Barangay
+              </Button>
+              {selectedBarangay && selectedBarangay !== 'all' && (
+                <Button
+                  onClick={() => {
+                    const barangay = barangays.find(b => b._id === selectedBarangay);
+                    if (barangay) {
+                      setBarangayToDelete({
+                        _id: barangay._id,
+                        name: barangay.name,
+                        address: barangay.address
+                      });
+                      setDeleteBarangayDialogOpen(true);
+                    }
+                  }}
+                  className="bg-red-600 hover:bg-red-500 text-white cursor-pointer transition-all duration-200 hover:shadow-md flex-shrink-0"
+                  variant="destructive"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete Barangay
+                </Button>
+              )}
+            </>
+          )}
+          {user && (user.role === 'admin' || user.role === 'teacher') && (
+            <Button
+              onClick={handleExportPdfClick}
+              className="bg-red-600 hover:bg-red-500 text-white cursor-pointer transition-all duration-200 hover:shadow-md flex-shrink-0"
+            >
+              <Download className="mr-2 h-4 w-4" /> Export to PDF
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Barangay Tabs */}
       {loadingBarangays ? (
         <BarangayTabsSkeleton />
       ) : (
-        <BarangayTabs
-          barangays={filteredBarangays}
-          selectedBarangay={user?.role === 'admin' ? selectedBarangay || 'all' : selectedBarangay}
-          onSelectBarangay={setSelectedBarangay}
-          showAllOption={user?.role === 'admin'}
-        />
+        <>
+          <BarangayTabs
+            barangays={filteredBarangays}
+            selectedBarangay={user?.role === 'admin' ? selectedBarangay || 'all' : selectedBarangay}
+            onSelectBarangay={setSelectedBarangay}
+            showAllOption={user?.role === 'admin'}
+          />
+          
+          {/* Sort Options - Only show when "all" is selected */}
+          {user?.role === 'admin' && (selectedBarangay === 'all' || selectedBarangay === null) && (
+            <div className="flex items-center gap-3 mt-4">
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Sort by:</Label>
+              <div className="flex gap-2">
+                <Button
+                  variant={sortMode === 'by-barangay' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSortMode('by-barangay')}
+                  className={sortMode === 'by-barangay' 
+                    ? 'bg-blue-600 hover:bg-blue-500 text-white' 
+                    : 'border-blue-600 text-blue-700 dark:text-blue-300'}
+                >
+                  By Barangay
+                </Button>
+                <Button
+                  variant={sortMode === 'alphabetical' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setSortMode('alphabetical')}
+                  className={sortMode === 'alphabetical' 
+                    ? 'bg-blue-600 hover:bg-blue-500 text-white' 
+                    : 'border-blue-600 text-blue-700 dark:text-blue-300'}
+                >
+                  Alphabetical
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
       )}
-
 
       {/* Student Table */}
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-lg border-4 border-blue-600 dark:border-blue-500">
@@ -522,6 +627,7 @@ export default function StudentsPage() {
               }
               barangays={barangays}
               mode={currentMode}
+              sortMode={user?.role === 'admin' && (selectedBarangay === 'all' || selectedBarangay === null) ? sortMode : 'by-barangay'}
               onEdit={
                 currentMode === 'archive' ? handleRetrieveStudent :
                   currentMode === 'graduated' ? handleRetrieveStudent :
@@ -1080,6 +1186,49 @@ export default function StudentsPage() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Add Barangay Dialog */}
+      {user && user.role === 'admin' && (
+        <AddBarangayDialog
+          open={addBarangayDialogOpen}
+          onOpenChange={setAddBarangayDialogOpen}
+          onSuccess={async () => {
+            // Refresh barangays after successful creation (force refresh to bypass cache)
+            await fetchBarangays(user, true);
+          }}
+        />
+      )}
+
+      {/* Delete Barangay Dialog */}
+      {user && user.role === 'admin' && barangayToDelete && (
+        <DeleteBarangayDialog
+          open={deleteBarangayDialogOpen}
+          onOpenChange={(open) => {
+            setDeleteBarangayDialogOpen(open);
+            if (!open) {
+              setBarangayToDelete(null);
+            }
+          }}
+          barangay={barangayToDelete}
+          onSuccess={async () => {
+            // Refresh barangays after successful deletion (force refresh to bypass cache)
+            await fetchBarangays(user, true);
+            // Reset selection if deleted barangay was selected
+            if (selectedBarangay === barangayToDelete._id) {
+              setSelectedBarangay('all');
+            }
+            setBarangayToDelete(null);
+          }}
+        />
+      )}
+
+      {/* PDF Export Dialog */}
+      <PdfExportDialog
+        open={pdfExportDialogOpen}
+        onOpenChange={setPdfExportDialogOpen}
+        onExport={handleExportPdf}
+        userName={user?.name || user?.email || 'Unknown User'}
+      />
     </div>
   );
 }

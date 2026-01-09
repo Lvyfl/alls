@@ -4,6 +4,7 @@ type ModulePayload = {
   title: string;
   levels: string[];
   predefinedActivities: PredefinedActivity[];
+  barangayIds?: string[];
 };
 
 // Load students data
@@ -33,15 +34,15 @@ export const fetchStudents = async (): Promise<Student[]> => {
 };
 
 // Load barangays data with persistence
-export const fetchBarangays = async (): Promise<Barangay[]> => {
+export const fetchBarangays = async (forceRefresh: boolean = false): Promise<Barangay[]> => {
   try {
     let barangays: Barangay[] = [];
 
-    // Fetch barangays from API with caching
+    // Fetch barangays from API - use no-store when force refresh is needed
     const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/barangays`, {
       method: "GET",
-      cache: "default",
-      next: { revalidate: 300 } // Revalidate every 5 minutes (barangays don't change often)
+      cache: forceRefresh ? "no-store" : "default",
+      ...(forceRefresh ? {} : { next: { revalidate: 300 } }) // Revalidate every 5 minutes (barangays don't change often)
     });
 
     // Check if the response is successful
@@ -55,6 +56,71 @@ export const fetchBarangays = async (): Promise<Barangay[]> => {
   } catch (error) {
     console.error("Error fetching barangays:", error);
     throw new Error("Failed to fetch barangays data");
+  }
+};
+
+// Create a new barangay (admin only)
+export const createBarangay = async (barangayData: {
+  name: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+}): Promise<Barangay> => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/barangays`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(barangayData),
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || "Failed to create barangay");
+    }
+
+    const response = await res.json();
+    return response.data as Barangay;
+  } catch (error) {
+    console.error("Error creating barangay:", error);
+    throw error;
+  }
+};
+
+// Delete a barangay (admin only, requires email and password verification)
+// Returns { success: true } or { success: false, error: string }
+export const deleteBarangay = async (
+  barangayId: string,
+  email: string,
+  password: string
+): Promise<{ success: boolean; error?: string }> => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/barangays`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        barangayId,
+        email,
+        password,
+      }),
+      cache: "no-store",
+    });
+
+    const response = await res.json();
+    
+    if (!res.ok || !response.success) {
+      const errorMessage = response.error || response.message || "Failed to delete barangay";
+      return { success: false, error: errorMessage };
+    }
+    
+    return { success: true };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Failed to delete barangay";
+    return { success: false, error: errorMessage };
   }
 };
 
@@ -94,7 +160,7 @@ export const fetchModules = async (barangayId?: string): Promise<Module[]> => {
   }
 };
 
-export const createModule = async (moduleData: ModulePayload & { barangayId?: string }): Promise<Module> => {
+export const createModule = async (moduleData: ModulePayload & { barangayId?: string; barangayIds?: string[] }): Promise<Module> => {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/modules`, {
       method: "POST",
@@ -131,7 +197,7 @@ export const createModule = async (moduleData: ModulePayload & { barangayId?: st
   }
 };
 
-export const updateModule = async (_id: string, moduleData: ModulePayload & { barangayId?: string }): Promise<Module> => {
+export const updateModule = async (_id: string, moduleData: ModulePayload & { barangayId?: string; barangayIds?: string[] }): Promise<Module> => {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/modules`, {
       method: "PATCH",
@@ -198,9 +264,10 @@ export const fetchProgress = async (studentId: string): Promise<Progress[]> => {
   try {
     let progress: Progress[] = [];
 
-    // Fetch progress from API
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/progress?studentId=${studentId}`, {
+    // Fetch progress from API with cache busting to ensure fresh data
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/progress?studentId=${studentId}&_t=${Date.now()}`, {
       method: "GET",
+      cache: "no-store",
     });
 
     // check if the response is successful

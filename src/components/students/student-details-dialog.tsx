@@ -79,7 +79,7 @@ export function StudentDetailsDialog({
                 </div>
 
                 <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-4">
-                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Gender</p>
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Sex</p>
                   <p className="text-base text-gray-900 dark:text-white capitalize">{student.gender}</p>
                 </div>
               </div>

@@ -432,7 +432,7 @@ export default function AdminManagementPage() {
                     htmlFor="gender"
                     className="text-gray-900 dark:text-white"
                   >
-                    Gender
+                    Sex
                   </Label>
                   <Select
                     onValueChange={(value) =>
@@ -441,7 +441,7 @@ export default function AdminManagementPage() {
                     disabled={isSubmitting}
                   >
                     <SelectTrigger className="border-2 border-blue-600 dark:border-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white">
-                      <SelectValue placeholder="Select gender" />
+                      <SelectValue placeholder="Select sex" />
                     </SelectTrigger>
                     <SelectContent className="bg-white dark:bg-slate-800 border-2 border-blue-600 dark:border-blue-500">
                       <SelectItem

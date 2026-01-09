@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Student, PredefinedActivity, ActivityType, Module } from '@/types';
+import { Student, PredefinedActivity, ActivityType, Module, Barangay } from '@/types';
 import { useAuthStoreState } from '@/store/auth-store';
 import {
   Dialog,
@@ -27,6 +27,7 @@ interface ModuleFormValues {
   title: string;
   levels: string[];
   predefinedActivities: PredefinedActivity[];
+  barangayIds?: string[];
 }
 
 interface AddCustomModuleDialogProps {
@@ -35,6 +36,7 @@ interface AddCustomModuleDialogProps {
   student: Student | null;
   mode?: 'create' | 'edit';
   moduleToEdit?: Module | null;
+  barangays?: Barangay[];
   onAddModule?: (moduleData: ModuleFormValues) => Promise<void>;
   onUpdateModule?: (moduleId: string, moduleData: ModuleFormValues) => Promise<void>;
 }
@@ -45,11 +47,13 @@ export function AddCustomModuleDialog({
   student,
   mode = 'create',
   moduleToEdit,
+  barangays = [],
   onAddModule,
   onUpdateModule
 }: AddCustomModuleDialogProps) {
   const [moduleTitle, setModuleTitle] = useState('');
   const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
+  const [selectedBarangays, setSelectedBarangays] = useState<string[]>([]);
   const [activities, setActivities] = useState<PredefinedActivity[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string>('');
@@ -83,6 +87,7 @@ export function AddCustomModuleDialog({
     if (!isOpen) {
       setModuleTitle('');
       setSelectedLevels([]);
+      setSelectedBarangays([]);
       setActivities([]);
       setError('');
       return;
@@ -93,6 +98,14 @@ export function AddCustomModuleDialog({
       setSelectedLevels(
         Array.isArray(moduleToEdit.levels) ? [...moduleToEdit.levels] : []
       );
+      // Load barangayIds if available, otherwise use single barangayId
+      if (moduleToEdit.barangayIds && moduleToEdit.barangayIds.length > 0) {
+        setSelectedBarangays([...moduleToEdit.barangayIds]);
+      } else if (moduleToEdit.barangayId) {
+        setSelectedBarangays([moduleToEdit.barangayId]);
+      } else {
+        setSelectedBarangays([]);
+      }
       setActivities(
         Array.isArray(moduleToEdit.predefinedActivities)
           ? moduleToEdit.predefinedActivities.map(activity => ({ ...activity }))
@@ -103,6 +116,7 @@ export function AddCustomModuleDialog({
     }
 
     setModuleTitle('');
+    setSelectedBarangays([]);
     setActivities([]);
     if (student?.program) {
       setSelectedLevels([student.program]);
@@ -147,6 +161,16 @@ export function AddCustomModuleDialog({
     });
   };
 
+  const handleBarangayToggle = (barangayId: string) => {
+    setSelectedBarangays(prev => {
+      if (prev.includes(barangayId)) {
+        return prev.filter(id => id !== barangayId);
+      } else {
+        return [...prev, barangayId];
+      }
+    });
+  };
+
   const validateForm = (): string | null => {
     if (!moduleTitle.trim()) {
       return 'Module name is required';
@@ -184,7 +208,8 @@ export function AddCustomModuleDialog({
     const payload: ModuleFormValues = {
       title: moduleTitle.trim(),
       levels: selectedLevels,
-      predefinedActivities: activities
+      predefinedActivities: activities,
+      barangayIds: selectedBarangays.length > 0 ? selectedBarangays : undefined
     };
 
     try {
@@ -283,6 +308,39 @@ export function AddCustomModuleDialog({
               </p>
             )}
           </div>
+
+          {/* Barangay Selection - Only show for admins */}
+          {isAdmin && barangays.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-900 dark:text-white">
+                Available For Barangays
+              </Label>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Select which barangays can access this module. Leave empty for all barangays.
+              </p>
+              <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-2 border-2 border-gray-200 dark:border-gray-700 rounded-md">
+                {barangays.map((barangay) => (
+                  <button
+                    key={barangay._id}
+                    type="button"
+                    onClick={() => handleBarangayToggle(barangay._id)}
+                    disabled={isSubmitting}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200 ${selectedBarangays.includes(barangay._id)
+                        ? 'bg-green-600 text-white border-2 border-green-600'
+                        : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-slate-600'
+                      }`}
+                  >
+                    {barangay.name}
+                  </button>
+                ))}
+              </div>
+              {selectedBarangays.length > 0 && (
+                <p className="text-xs text-green-600 dark:text-green-400">
+                  {selectedBarangays.length} barangay(s) selected
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Activities Section */}
           <div className="space-y-3">

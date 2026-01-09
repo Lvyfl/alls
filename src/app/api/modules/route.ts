@@ -50,6 +50,7 @@ export async function GET(req: Request) {
           levels: 1,
           predefinedActivities: 1,
           barangayId: 1,
+          barangayIds: 1,
           createdAt: 1,
         }
       })
@@ -73,6 +74,8 @@ export async function GET(req: Request) {
       _id: module._id?.toString() || module._id,
       // Ensure barangayId is included in response
       barangayId: module.barangayId || undefined,
+      // Ensure barangayIds array is included in response
+      barangayIds: module.barangayIds || undefined,
       // createdAt is optional - existing modules without it will still work
       createdAt: module.createdAt || undefined,
     }));
@@ -149,8 +152,11 @@ export async function POST(req: Request) {
       createdAt: new Date().toISOString(), // Add creation timestamp
     };
 
-    // Only add barangayId if it's provided (don't add undefined/null)
-    if (barangayId) {
+    // Handle barangayIds array (new format - supports multiple barangays)
+    if (moduleData.barangayIds && Array.isArray(moduleData.barangayIds) && moduleData.barangayIds.length > 0) {
+      insertData.barangayIds = moduleData.barangayIds;
+    } else if (barangayId) {
+      // Fall back to single barangayId (legacy format)
       insertData.barangayId = barangayId;
     }
 
@@ -195,6 +201,7 @@ export async function POST(req: Request) {
         levels: insertData.levels,
         predefinedActivities: insertData.predefinedActivities,
         barangayId: insertedModule.barangayId || undefined, // Use the actual saved value
+        barangayIds: insertedModule.barangayIds || undefined, // Include barangayIds array
         createdAt: insertData.createdAt
       }
     });
@@ -213,7 +220,7 @@ export async function PATCH(req: Request) {
     const db = client.db("main");
     const moduleData = await req.json();
 
-    const { _id, title, levels, predefinedActivities, barangayId } = moduleData || {};
+    const { _id, title, levels, predefinedActivities, barangayId, barangayIds } = moduleData || {};
 
     if (!_id) {
       return NextResponse.json(
@@ -247,15 +254,15 @@ export async function PATCH(req: Request) {
     // For existing modules, validate permissions
     if (existingModule) {
       // Validate teacher can edit modules for their assigned barangay OR global modules (new modules)
-      if (userRole === 'teacher') {
-        if (!assignedBarangayId) {
-          return NextResponse.json(
-            { success: false, error: "Teacher must have an assigned barangay to edit modules" },
-            { status: 403 }
-          );
-        }
+    if (userRole === 'teacher') {
+      if (!assignedBarangayId) {
+        return NextResponse.json(
+          { success: false, error: "Teacher must have an assigned barangay to edit modules" },
+          { status: 403 }
+        );
+      }
 
-        const moduleBarangayId = existingModule.barangayId;
+      const moduleBarangayId = existingModule.barangayId;
         // Teachers can edit:
         // 1. Modules that belong to their barangay
         // 2. Global modules (without barangayId) - these are "new modules" visible to teachers
@@ -271,10 +278,10 @@ export async function PATCH(req: Request) {
       // For hard-coded modules being created, validate teacher permissions
       if (userRole === 'teacher') {
         if (!assignedBarangayId) {
-          return NextResponse.json(
+        return NextResponse.json(
             { success: false, error: "Teacher must have an assigned barangay to create/edit modules" },
-            { status: 403 }
-          );
+          { status: 403 }
+        );
         }
         // Teachers can create modules for their barangay or as global modules
         // The barangayId will be set in the updatePayload below
@@ -319,8 +326,18 @@ export async function PATCH(req: Request) {
       updatePayload.predefinedActivities = predefinedActivities;
     }
 
-    // Handle barangayId update: admins can't change barangayId, master_admin can
-    if (barangayId !== undefined && userRole === 'admin') {
+    // Handle barangayIds array (new format - supports multiple barangays)
+    if (barangayIds !== undefined && userRole === 'admin') {
+      if (Array.isArray(barangayIds) && barangayIds.length > 0) {
+        updatePayload.barangayIds = barangayIds;
+        updatePayload.barangayId = null; // Clear legacy field when using new format
+      } else {
+        updatePayload.barangayIds = null; // Clear if empty array
+      }
+    }
+    
+    // Handle barangayId update (legacy format): admins can change, teachers stay assigned
+    if (barangayId !== undefined && userRole === 'admin' && !barangayIds) {
       updatePayload.barangayId = barangayId || null; // Allow setting to null for global modules
     } else if (userRole === 'teacher' && assignedBarangayId) {
       // Ensure teacher's modules stay assigned to their barangay
@@ -427,7 +444,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json(
         { success: false, error: "Module not found or could not be updated" },
         { status: 404 }
-      );
+    );
     }
 
     // Check if the update actually modified anything
