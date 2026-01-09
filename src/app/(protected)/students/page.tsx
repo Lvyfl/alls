@@ -46,7 +46,7 @@ const StudentDetailsDialog = dynamic(
 );
 
 // Regular import for utility function (not a component)
-import { exportStudentMasterlist, exportStudentMasterlistPdf } from '@/utils/excel-export';
+import { exportStudentMasterlistPdf } from '@/utils/pdf-export';
 
 export default function StudentsPage() {
   // Get user from auth store
@@ -409,33 +409,6 @@ export default function StudentsPage() {
     () => students.filteredData.filter(s => s.status === 'graduated'),
     [students.filteredData]
   );
-
-  // Handle Excel export with useCallback - export based on current mode
-  const handleExportExcel = useCallback(async () => {
-    try {
-      // Determine which students to export based on current mode
-      let studentsToExport: Student[] = [];
-      
-      if (currentMode === 'masterlist') {
-        studentsToExport = masterlistStudents;
-      } else if (currentMode === 'archive') {
-        studentsToExport = archivedStudents;
-      } else if (currentMode === 'graduated') {
-        studentsToExport = graduatedStudents;
-      }
-
-      if (studentsToExport.length === 0) {
-        alert('No students to export in the current view.');
-        return;
-      }
-
-      // Export to Excel with selected barangay for header
-      await exportStudentMasterlist(studentsToExport, barangays, selectedBarangay);
-    } catch (error) {
-      console.error('Error exporting to Excel:', error);
-      alert('Failed to export to Excel. Please try again.');
-    }
-  }, [currentMode, masterlistStudents, archivedStudents, graduatedStudents, barangays, selectedBarangay]);
 
   // Handle PDF export - open dialog first
   const handleExportPdfClick = useCallback(() => {
