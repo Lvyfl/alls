@@ -73,6 +73,7 @@ const normalizeModuleRecord = (module: any): Module => {
         type: (activity?.type as any) || "Assessment",
         total: Number(activity?.total) || 0,
         description: activity?.description || "",
+        barangayId: activity?.barangayId || undefined,
       }))
       : [],
     barangayId: module?.barangayId,
@@ -665,6 +666,7 @@ export default function ModulesPage() {
           activities={moduleForActivities.predefinedActivities || []}
           onSave={handleSaveActivities}
           moduleTitle={moduleForActivities.title}
+          user={user}
         />
       )}
 

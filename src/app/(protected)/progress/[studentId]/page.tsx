@@ -50,6 +50,7 @@ const normalizeModuleRecord = (module: any): Module => {
         type: (activity?.type as any) || "Assessment",
         total: Number(activity?.total) || 0,
         description: activity?.description || "",
+        barangayId: activity?.barangayId || undefined,
       }))
       : [],
     barangayId: module?.barangayId,
@@ -120,6 +121,21 @@ const filterModulesForProgram = (modules: Module[], program?: string | null, bar
   }
 
   return filtered;
+};
+
+// Filter predefined activities by student's barangay
+// Activities without barangayId are global and shown to all students
+// Activities with barangayId are only shown to students from that barangay
+const filterActivitiesByBarangay = (activities: PredefinedActivity[], studentBarangayId?: string): PredefinedActivity[] => {
+  if (!activities || activities.length === 0) return [];
+  
+  return activities.filter(activity => {
+    // If activity has no barangayId, it's global - show to all students
+    if (!activity.barangayId) return true;
+    
+    // If activity has barangayId, only show to students from that barangay
+    return activity.barangayId === studentBarangayId;
+  });
 };
 
 type ModuleFormPayload = {
@@ -1053,8 +1069,8 @@ function StudentActivitySummaryPageContent() {
                           onPreviousStudent={handlePreviousStudent}
                           onNextStudent={handleNextStudent}
                           isNavigating={isNavigating}
-                          // Predefined activities for quick add
-                          predefinedActivities={module.predefinedActivities || []}
+                          // Predefined activities for quick add - filtered by student's barangay
+                          predefinedActivities={filterActivitiesByBarangay(module.predefinedActivities || [], student?.barangayId)}
                           // Custom module handler
                           onAddCustomModule={() => handleOpenModuleDialog("create")}
                           userRole={user?.role}

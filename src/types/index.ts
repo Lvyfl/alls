@@ -63,6 +63,7 @@ export interface PredefinedActivity {
   type: ActivityType;
   total: number;
   description: string;
+  barangayId?: string; // Optional: if set, activity only applies to students from this barangay
 }
 
 // Module Interface

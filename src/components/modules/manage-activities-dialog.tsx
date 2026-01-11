@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { PredefinedActivity, ActivityType } from '@/types';
+import { User } from '@/types/auth';
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,7 @@ interface ManageActivitiesDialogProps {
   activities: PredefinedActivity[];
   onSave: (activities: PredefinedActivity[]) => Promise<void>;
   moduleTitle: string;
+  user?: User | null;
 }
 
 export function ManageActivitiesDialog({
@@ -36,6 +38,7 @@ export function ManageActivitiesDialog({
   activities: initialActivities,
   onSave,
   moduleTitle,
+  user,
 }: ManageActivitiesDialogProps) {
   const [activities, setActivities] = useState<PredefinedActivity[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -65,14 +68,21 @@ export function ManageActivitiesDialog({
   }, [isOpen, initialActivities]);
 
   const handleAddActivity = () => {
+    const newActivity: PredefinedActivity = {
+      name: '',
+      type: 'Assessment',
+      total: 0,
+      description: ''
+    };
+    
+    // If user is a teacher, automatically set barangayId for the activity
+    if (user?.role === 'teacher' && user?.assignedBarangayId) {
+      newActivity.barangayId = user.assignedBarangayId;
+    }
+    
     setActivities([
       ...activities,
-      {
-        name: '',
-        type: 'Assessment',
-        total: 0,
-        description: ''
-      }
+      newActivity
     ]);
   };
 
