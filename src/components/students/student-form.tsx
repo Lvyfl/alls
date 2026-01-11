@@ -256,6 +256,7 @@ export function StudentForm({ student, barangays, user, onSubmit, onCancel, isSu
                 <FormControl>
                   <Input
                     type="date"
+                    max={`${new Date().getFullYear() - 1}-12-31`}
                     className="border-blue-200 focus:border-blue-500 focus:ring-blue-500"
                     {...field}
                   />

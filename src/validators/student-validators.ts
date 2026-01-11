@@ -10,7 +10,12 @@ export const studentSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
   status: z.enum(['active', 'inactive', 'graduated'] as const),
   gender: z.enum(['male', 'female'] as const),
-  birthDate: z.string().optional(),
+  birthDate: z.string().optional().refine((date) => {
+    if (!date) return true;
+    const birthYear = new Date(date).getFullYear();
+    const currentYear = new Date().getFullYear();
+    return birthYear < currentYear;
+  }, { message: "Birth year must be before the current year" }),
   address: z.string().min(5, { message: "Address must be at least 5 characters" }),
   barangayId: z.string().min(1, { message: "Barangay is required" }),
   program: z.string().min(1, { message: "Program is required" }),

@@ -30,6 +30,20 @@ export function StudentDetailsDialog({
 
   const barangay = barangays.find(b => b._id === student.barangayId);
 
+  const calculateAge = (birthDate: string | undefined): number | null => {
+    if (!birthDate) return null;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const age = calculateAge(student.birthDate);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto border-2 border-blue-200 dark:border-blue-500 bg-white dark:bg-slate-800">
@@ -82,6 +96,13 @@ export function StudentDetailsDialog({
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Sex</p>
                   <p className="text-base text-gray-900 dark:text-white capitalize">{student.gender}</p>
                 </div>
+
+                <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-4">
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Birthday</p>
+                  <p className="text-base text-gray-900 dark:text-white">
+                    {student.birthDate ? formatDate(student.birthDate) : 'Not set'}
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-4">
@@ -93,6 +114,13 @@ export function StudentDetailsDialog({
                 <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-4">
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Enrollment Date</p>
                   <p className="text-base text-gray-900 dark:text-white">{formatDate(student.enrollmentDate)}</p>
+                </div>
+
+                <div className="bg-gray-50 dark:bg-slate-700 rounded-lg p-4">
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Age</p>
+                  <p className="text-base text-gray-900 dark:text-white">
+                    {age !== null ? `${age} years old` : 'Not available'}
+                  </p>
                 </div>
               </div>
             </div>
