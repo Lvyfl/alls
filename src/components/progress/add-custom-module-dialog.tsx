@@ -127,14 +127,21 @@ export function AddCustomModuleDialog({
   }, [isOpen, student, isEditMode, moduleToEdit]);
 
   const handleAddActivity = () => {
+    const newActivity: PredefinedActivity = {
+      name: '',
+      type: 'Assessment',
+      total: 0,
+      description: ''
+    };
+    
+    // If user is a teacher, automatically set barangayId for the activity
+    if (user?.role === 'teacher' && user?.assignedBarangayId) {
+      newActivity.barangayId = user.assignedBarangayId;
+    }
+    
     setActivities([
       ...activities,
-      {
-        name: '',
-        type: 'Assessment',
-        total: 0,
-        description: ''
-      }
+      newActivity
     ]);
   };
 

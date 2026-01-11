@@ -235,6 +235,23 @@ export default function ModulesPage() {
     }).length;
   }, [studentsList, barangayFilter, user?.role, user?.assignedBarangayId]);
 
+  // Get activity count filtered by barangay for teachers
+  const getActivityCount = useCallback((module: Module): number => {
+    if (!module.predefinedActivities || module.predefinedActivities.length === 0) {
+      return 0;
+    }
+    
+    // For teachers, only count activities from their barangay or global activities
+    if (user?.role === 'teacher' && user?.assignedBarangayId) {
+      return module.predefinedActivities.filter(
+        activity => !activity.barangayId || activity.barangayId === user.assignedBarangayId
+      ).length;
+    }
+    
+    // For admins, count all activities
+    return module.predefinedActivities.length;
+  }, [user?.role, user?.assignedBarangayId]);
+
   // Handle create module
   const handleCreateModule = useCallback(
     async (moduleData: ModuleFormValues) => {
@@ -548,7 +565,7 @@ export default function ModulesPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-gray-900 dark:text-white">
-                        {module.predefinedActivities?.length || 0} activities
+                        {getActivityCount(module)} activities
                       </TableCell>
                       {(user?.role === 'admin' || user?.role === 'teacher') && (
                         <TableCell>

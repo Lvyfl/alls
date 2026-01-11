@@ -55,17 +55,38 @@ export function ManageActivitiesDialog({
     'Examination'
   ];
 
+  // Store activities from other barangays to preserve them when saving
+  const [otherBarangayActivities, setOtherBarangayActivities] = useState<PredefinedActivity[]>([]);
+
   // Initialize activities when dialog opens
+  // For teachers: only show activities from their barangay or global activities
+  // For admins: show all activities
   useEffect(() => {
     if (isOpen) {
-      setActivities(
-        Array.isArray(initialActivities)
-          ? initialActivities.map(activity => ({ ...activity }))
-          : []
-      );
+      if (Array.isArray(initialActivities)) {
+        if (user?.role === 'teacher' && user?.assignedBarangayId) {
+          // Filter to show only teacher's barangay activities and global activities
+          const teacherActivities = initialActivities.filter(
+            activity => !activity.barangayId || activity.barangayId === user.assignedBarangayId
+          );
+          // Store other barangay activities to preserve them when saving
+          const otherActivities = initialActivities.filter(
+            activity => activity.barangayId && activity.barangayId !== user.assignedBarangayId
+          );
+          setActivities(teacherActivities.map(activity => ({ ...activity })));
+          setOtherBarangayActivities(otherActivities);
+        } else {
+          // Admin sees all activities
+          setActivities(initialActivities.map(activity => ({ ...activity })));
+          setOtherBarangayActivities([]);
+        }
+      } else {
+        setActivities([]);
+        setOtherBarangayActivities([]);
+      }
       setError('');
     }
-  }, [isOpen, initialActivities]);
+  }, [isOpen, initialActivities, user?.role, user?.assignedBarangayId]);
 
   const handleAddActivity = () => {
     const newActivity: PredefinedActivity = {
@@ -132,7 +153,9 @@ export function ManageActivitiesDialog({
     setError('');
 
     try {
-      await onSave(activities);
+      // Merge teacher's activities with other barangay activities to preserve them
+      const allActivities = [...activities, ...otherBarangayActivities];
+      await onSave(allActivities);
       onClose();
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to save activities');
